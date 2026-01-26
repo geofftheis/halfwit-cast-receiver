@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riffly - Cast Receiver</title>
+    <!-- Noto Color Emoji font for reliable emoji rendering on Chromecast -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Cast Receiver SDK -->
+    <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Connecting screen (default) -->
+        <div id="connecting-screen" class="screen active">
+            <div class="logo">Riffly</div>
+            <div class="status">Connecting...</div>
+        </div>
+
+        <!-- Lobby screen -->
+        <div id="lobby-screen" class="screen">
+            <div class="header">
+                <div class="game-name"></div>
+                <div class="host-info">Hosted by <span class="host-name"></span></div>
+            </div>
+            <div class="game-settings">
+                <span class="player-count"></span>
+                <span class="separator">|</span>
+                <span class="round-count"></span>
+            </div>
+            <div class="player-list"></div>
+            <div class="waiting-message">Waiting for host to start...</div>
+        </div>
+
+        <!-- Loading screen -->
+        <div id="loading-screen" class="screen">
+            <div class="logo">Riffly</div>
+            <div class="loader"></div>
+            <div class="status">Loading Game...</div>
+        </div>
+
+        <!-- Round countdown screen -->
+        <div id="countdown-screen" class="screen">
+            <div class="round-label">Round <span class="round-number">1</span></div>
+            <div class="countdown-circle">
+                <span class="countdown-number">5</span>
+            </div>
+            <div class="round-progress">of <span class="total-rounds">3</span> rounds</div>
+        </div>
+
+        <!-- Answering screen -->
+        <div id="answering-screen" class="screen">
+            <div class="phase-label">Round <span class="round-number">1</span></div>
+            <div class="countdown-timer">
+                <div class="timer-circle">
+                    <span class="timer-seconds">60</span>
+                </div>
+            </div>
+            <div class="answer-status">
+                Answers Received for <span class="answers-received">0</span> of <span class="total-players">8</span> Players
+            </div>
+        </div>
+
+        <!-- Voting transition screen -->
+        <div id="voting-transition-screen" class="screen">
+            <div class="big-text">Time to Vote!</div>
+        </div>
+
+        <!-- Matchup voting screen -->
+        <div id="matchup-voting-screen" class="screen">
+            <div class="prompt-card">
+                <div class="prompt-text"></div>
+            </div>
+            <div class="answers-container">
+                <div class="answer-card answer-1">
+                    <div class="answer-text"></div>
+                </div>
+                <div class="vs-badge">VS</div>
+                <div class="answer-card answer-2">
+                    <div class="answer-text"></div>
+                </div>
+            </div>
+            <div class="voting-footer">
+                <div class="countdown-timer">
+                    <span class="timer-seconds">30</span>s
+                </div>
+                <div class="vote-status">
+                    Votes Received for <span class="votes-received">0</span> of <span class="eligible-voters">6</span> Players
+                </div>
+                <div class="matchup-progress">
+                    Matchup <span class="matchup-number">1</span> of <span class="total-matchups">4</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matchup results screen -->
+        <div id="matchup-results-screen" class="screen">
+            <div class="prompt-card">
+                <div class="prompt-text"></div>
+            </div>
+            <div class="results-container">
+                <div class="result-card result-1">
+                    <div class="player-name"></div>
+                    <div class="answer-text"></div>
+                    <div class="result-footer">
+                        <div class="voter-icons"></div>
+                        <div class="score-section">
+                            <div class="total-points">+<span class="points">0</span></div>
+                            <div class="score-breakdown">
+                                <div class="votes-line">Votes: +<span class="votes">0</span></div>
+                                <div class="bonus-line">Matchup Bonus: +1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-card result-2">
+                    <div class="player-name"></div>
+                    <div class="answer-text"></div>
+                    <div class="result-footer">
+                        <div class="voter-icons"></div>
+                        <div class="score-section">
+                            <div class="total-points">+<span class="points">0</span></div>
+                            <div class="score-breakdown">
+                                <div class="votes-line">Votes: +<span class="votes">0</span></div>
+                                <div class="bonus-line">Matchup Bonus: +1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="abstain-section">
+                <div class="abstain-label">Abstained:</div>
+                <div class="abstain-icons"></div>
+            </div>
+        </div>
+
+        <!-- Round results screen -->
+        <div id="round-results-screen" class="screen">
+            <div class="results-header">
+                <div class="round-label">Round <span class="round-number">1</span> Results</div>
+            </div>
+            <div class="leaderboard"></div>
+        </div>
+
+        <!-- Game results screen -->
+        <div id="game-results-screen" class="screen">
+            <div class="winner-section">
+                <div class="trophy">🏆</div>
+                <div class="winner-name"></div>
+                <div class="winner-label">Wins!</div>
+            </div>
+            <div class="final-standings">
+                <div class="standings-header">Final Standings</div>
+                <div class="leaderboard"></div>
+            </div>
+        </div>
+
+        <!-- End screen -->
+        <div id="end-screen" class="screen">
+            <div class="logo">Riffly</div>
+            <div class="status">Thanks for playing!</div>
+        </div>
+    </div>
+
+    <script src="receiver.js"></script>
+</body>
+</html>
