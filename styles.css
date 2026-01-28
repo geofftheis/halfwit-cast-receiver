@@ -102,6 +102,12 @@ body {
     margin-bottom: 20px;
 }
 
+.logo-image {
+    height: 120px;
+    width: auto;
+    margin-bottom: 20px;
+}
+
 .status {
     font-size: 28px;
     color: var(--riffly-white);
