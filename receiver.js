@@ -78,9 +78,10 @@ function createPlayerCard(player) {
 /**
  * Create a leaderboard entry element
  */
-function createLeaderboardEntry(player, showRoundScore = true) {
+function createLeaderboardEntry(player, showRoundScore = true, highlightTotalScore = false) {
     const entry = document.createElement('div');
     entry.className = 'leaderboard-entry rank-' + player.rank;
+    entry.setAttribute('data-player-id', player.peerId || player.name);
 
     const rank = document.createElement('span');
     rank.className = 'rank';
@@ -107,7 +108,7 @@ function createLeaderboardEntry(player, showRoundScore = true) {
     }
 
     const totalScore = document.createElement('span');
-    totalScore.className = 'total-score';
+    totalScore.className = 'total-score' + (highlightTotalScore ? ' highlighted' : '');
     totalScore.textContent = player.totalScore;
 
     entry.appendChild(rank);
@@ -334,20 +335,68 @@ function updateMatchupResultsScreen(data) {
     }
 }
 
+// Track round results state for reordering animation
+let roundResultsReorderTimeout = null;
+
 /**
- * Update round results screen
+ * Update round results screen with reordering animation
  */
 function updateRoundResultsScreen(data) {
     const screen = screens.roundResults;
+
+    // Clear any pending reorder timeout from previous round
+    if (roundResultsReorderTimeout) {
+        clearTimeout(roundResultsReorderTimeout);
+        roundResultsReorderTimeout = null;
+    }
 
     screen.querySelector('.round-number').textContent = data.roundNumber;
 
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
 
+    // Initially show players sorted by round score (this is what the host sends first)
     data.players.forEach(player => {
-        leaderboard.appendChild(createLeaderboardEntry(player, true));
+        leaderboard.appendChild(createLeaderboardEntry(player, true, false));
     });
+
+    // After 3 seconds, reorder by total score and highlight total scores
+    roundResultsReorderTimeout = setTimeout(() => {
+        // Sort players by total score (descending)
+        const sortedByTotal = [...data.players].sort((a, b) => b.totalScore - a.totalScore);
+
+        // Assign new ranks based on total score
+        let currentRank = 1;
+        sortedByTotal.forEach((player, index) => {
+            if (index > 0 && sortedByTotal[index - 1].totalScore > player.totalScore) {
+                currentRank = index + 1;
+            }
+            player.totalRank = currentRank;
+        });
+
+        // Get current positions of entries
+        const entries = leaderboard.querySelectorAll('.leaderboard-entry');
+        const positions = new Map();
+        entries.forEach(entry => {
+            const rect = entry.getBoundingClientRect();
+            const playerId = entry.getAttribute('data-player-id');
+            positions.set(playerId, rect.top);
+        });
+
+        // Clear and rebuild with new order
+        leaderboard.innerHTML = '';
+        sortedByTotal.forEach(player => {
+            const updatedPlayer = { ...player, rank: player.totalRank };
+            leaderboard.appendChild(createLeaderboardEntry(updatedPlayer, true, true));
+        });
+
+        // Animate the transition using CSS
+        leaderboard.classList.add('reordering');
+        setTimeout(() => {
+            leaderboard.classList.remove('reordering');
+        }, 2000);
+
+    }, 3000);
 }
 
 /**
