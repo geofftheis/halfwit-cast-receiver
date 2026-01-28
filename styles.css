@@ -521,23 +521,8 @@ body {
     gap: 20px;
     color: var(--riffly-dark);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    transition: transform 0.8s ease-in-out, opacity 0.3s ease;
-}
-
-/* Reordering animation for round results */
-.leaderboard.reordering .leaderboard-entry {
-    animation: slideIn 0.8s ease-out forwards;
-}
-
-@keyframes slideIn {
-    0% {
-        opacity: 0.7;
-        transform: translateY(-10px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    /* Smooth transition for reordering animation */
+    will-change: transform;
 }
 
 .leaderboard-entry .rank {
