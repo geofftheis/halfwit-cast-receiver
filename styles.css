@@ -27,12 +27,41 @@ body {
     overflow: hidden;
 }
 
-/* Emoji rendering - ensure color emojis display properly on Chromecast */
-.icon, .voter-icon, .abstain-icon, .trophy {
-    font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
-    font-style: normal;
-    font-weight: normal;
-    line-height: 1;
+/* Twemoji image styling - emojis are rendered as images for Chromecast compatibility */
+.icon img.emoji,
+.voter-icon img.emoji,
+.abstain-icon img.emoji,
+.trophy img.emoji {
+    height: 1em;
+    width: 1em;
+    margin: 0 0.05em 0 0.1em;
+    vertical-align: -0.1em;
+}
+
+/* Specific sizes for different contexts */
+.player-card .icon img.emoji {
+    height: 32px;
+    width: 32px;
+}
+
+.leaderboard-entry .icon img.emoji {
+    height: 32px;
+    width: 32px;
+}
+
+.voter-icon img.emoji {
+    height: 24px;
+    width: 24px;
+}
+
+.abstain-icon img.emoji {
+    height: 20px;
+    width: 20px;
+}
+
+.trophy img.emoji {
+    height: 96px;
+    width: 96px;
 }
 
 #app {

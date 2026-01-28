@@ -55,6 +55,20 @@ function updateTimerStyle(element, seconds, totalSeconds) {
 }
 
 /**
+ * Parse emojis in an element using Twemoji (renders as images)
+ * This ensures emojis display correctly on Chromecast devices
+ */
+function parseEmojis(element) {
+    if (typeof twemoji !== 'undefined') {
+        twemoji.parse(element, {
+            folder: 'svg',
+            ext: '.svg',
+            base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/'
+        });
+    }
+}
+
+/**
  * Create a player card element
  */
 function createPlayerCard(player) {
@@ -71,6 +85,9 @@ function createPlayerCard(player) {
 
     card.appendChild(icon);
     card.appendChild(name);
+
+    // Parse emojis to render as images
+    parseEmojis(icon);
 
     return card;
 }
@@ -116,6 +133,9 @@ function createLeaderboardEntry(player, showRoundScore = true, highlightTotalSco
     entry.appendChild(info);
     entry.appendChild(totalScore);
 
+    // Parse emojis to render as images
+    parseEmojis(icon);
+
     return entry;
 }
 
@@ -126,6 +146,8 @@ function createVoterIcon(iconId, isAbstain = false) {
     const icon = document.createElement('span');
     icon.className = isAbstain ? 'abstain-icon' : 'voter-icon';
     icon.textContent = iconId;
+    // Parse emojis to render as images
+    parseEmojis(icon);
     return icon;
 }
 
@@ -418,6 +440,8 @@ function updateGameResultsScreen(data) {
         winnerName.textContent = data.winnerName;
         winnerLabel.textContent = 'Wins!';
     }
+    // Parse trophy emoji to render as image
+    parseEmojis(trophy);
 
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
