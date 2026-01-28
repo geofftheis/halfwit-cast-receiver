@@ -494,6 +494,23 @@ function updateRoundResultsScreen(data) {
             entry.style.transform = `translateY(${moveDistance}px)`;
         });
 
+        // After animation completes, reorder DOM elements to fix spacing
+        setTimeout(() => {
+            console.log('Animation complete, reordering DOM');
+
+            // Sort entries by their final index
+            const sortedEntries = entries.slice().sort((a, b) => {
+                return parseInt(a.getAttribute('data-final-index')) - parseInt(b.getAttribute('data-final-index'));
+            });
+
+            // Remove transforms and reorder in DOM
+            sortedEntries.forEach(entry => {
+                entry.style.transition = 'none';
+                entry.style.transform = 'none';
+                leaderboard.appendChild(entry); // Re-appending moves to end, so doing in order reorders them
+            });
+        }, 850); // Slightly after the 0.8s animation
+
     }, 3000);
 }
 
