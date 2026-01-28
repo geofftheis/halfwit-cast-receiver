@@ -549,21 +549,31 @@ body {
     font-weight: 600;
 }
 
+.leaderboard-entry .score-section {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
 .leaderboard-entry .round-score {
-    font-size: 14px;
-    color: var(--riffly-teal);
-    opacity: 0.8;
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--riffly-pink);
 }
 
 .leaderboard-entry .total-score {
-    font-size: 32px;
-    font-weight: bold;
-    color: var(--riffly-lime);
-    transition: color 0.5s ease;
+    font-size: 14px;
+    color: var(--riffly-teal);
+    opacity: 0.8;
+    transition: all 0.5s ease;
 }
 
 .leaderboard-entry .total-score.highlighted {
+    font-size: 18px;
+    font-weight: bold;
     color: var(--riffly-pink);
+    opacity: 1;
 }
 
 /* Game Results Screen */

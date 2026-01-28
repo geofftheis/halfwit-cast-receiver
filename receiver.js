@@ -123,21 +123,29 @@ function createLeaderboardEntry(player, showRoundScore = true, highlightTotalSco
 
     info.appendChild(name);
 
+    // Score section on the right side
+    const scoreSection = document.createElement('div');
+    scoreSection.className = 'score-section';
+
     if (showRoundScore && player.roundScore !== undefined) {
+        // Large round score in pink (e.g., "+2")
         const roundScore = document.createElement('div');
         roundScore.className = 'round-score';
-        roundScore.textContent = '+' + player.roundScore + ' this round';
-        info.appendChild(roundScore);
+        roundScore.textContent = '+' + player.roundScore;
+        scoreSection.appendChild(roundScore);
     }
 
-    const totalScore = document.createElement('span');
+    // Smaller total score below (e.g., "Total Score: 6 Points")
+    const totalScore = document.createElement('div');
     totalScore.className = 'total-score' + (highlightTotalScore ? ' highlighted' : '');
-    totalScore.textContent = player.totalScore;
+    const points = player.totalScore === 1 ? 'Point' : 'Points';
+    totalScore.textContent = 'Total Score: ' + player.totalScore + ' ' + points;
+    scoreSection.appendChild(totalScore);
 
     entry.appendChild(rank);
     entry.appendChild(icon);
     entry.appendChild(info);
-    entry.appendChild(totalScore);
+    entry.appendChild(scoreSection);
 
     // Parse emojis to render as images
     parseEmojis(icon);
@@ -368,7 +376,7 @@ let roundResultsReorderTimeout = null;
 
 /**
  * Update round results screen with reordering animation
- * Uses FLIP animation technique for smooth reordering
+ * Shows players sorted by round score first, then animates to total score order
  */
 function updateRoundResultsScreen(data) {
     const screen = screens.roundResults;
@@ -384,57 +392,87 @@ function updateRoundResultsScreen(data) {
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
 
+    // Sort players by round score (descending) for initial display
+    const sortedByRound = [...data.players].sort((a, b) => b.roundScore - a.roundScore);
+
+    // Assign initial ranks based on round score
+    let roundRank = 1;
+    sortedByRound.forEach((player, index) => {
+        if (index > 0 && sortedByRound[index - 1].roundScore > player.roundScore) {
+            roundRank = index + 1;
+        }
+        player.displayRank = roundRank;
+    });
+
     // Sort by total score to get final rankings
     const sortedByTotal = [...data.players].sort((a, b) => b.totalScore - a.totalScore);
 
-    // Assign ranks based on total score
-    let currentRank = 1;
+    // Assign final ranks based on total score
+    let totalRank = 1;
     sortedByTotal.forEach((player, index) => {
         if (index > 0 && sortedByTotal[index - 1].totalScore > player.totalScore) {
-            currentRank = index + 1;
+            totalRank = index + 1;
         }
-        player.finalRank = currentRank;
+        player.finalRank = totalRank;
     });
 
-    // Create a map of player to their final position index
+    // Create a map of player name to their final position index in the sorted-by-total array
     const finalPositions = new Map();
     sortedByTotal.forEach((player, index) => {
-        finalPositions.set(player.peerId || player.name, index);
+        finalPositions.set(player.name, index);
     });
 
-    // Initially show players in their CURRENT order (as sent from host, sorted by round score)
-    // but we'll animate them to their final positions
-    data.players.forEach((player, index) => {
+    // Initially show players sorted by round score
+    sortedByRound.forEach((player, index) => {
         const entry = createLeaderboardEntry(player, true, false);
-        const playerId = player.peerId || player.name;
-        const finalIndex = finalPositions.get(playerId);
 
-        // Store initial and final positions for animation
+        // Find this player's final position
+        const finalIndex = finalPositions.get(player.name);
+        const finalRank = sortedByTotal[finalIndex].finalRank;
+
+        // Store animation data
         entry.setAttribute('data-initial-index', index);
         entry.setAttribute('data-final-index', finalIndex);
-        entry.setAttribute('data-final-rank', sortedByTotal[finalIndex].finalRank);
+        entry.setAttribute('data-final-rank', finalRank);
 
         leaderboard.appendChild(entry);
     });
 
-    // After 3 seconds, animate to final positions
+    console.log('Round results: initial order by round score, will animate in 3s');
+
+    // After 3 seconds, animate to final positions sorted by total score
     roundResultsReorderTimeout = setTimeout(() => {
+        console.log('Starting reorder animation');
+
         const entries = Array.from(leaderboard.querySelectorAll('.leaderboard-entry'));
-        const entryHeight = entries[0] ? entries[0].offsetHeight + 15 : 75; // height + gap
+        if (entries.length === 0) {
+            console.log('No entries found for animation');
+            return;
+        }
 
-        // FIRST: Record current positions
-        const firstPositions = new Map();
-        entries.forEach(entry => {
-            const rect = entry.getBoundingClientRect();
-            firstPositions.set(entry, rect.top);
-        });
+        // Calculate entry height including gap
+        const firstEntry = entries[0];
+        const secondEntry = entries[1];
+        let entryHeight = 75; // default
 
-        // Calculate and apply transforms to move entries to final positions
-        entries.forEach(entry => {
+        if (firstEntry && secondEntry) {
+            const firstRect = firstEntry.getBoundingClientRect();
+            const secondRect = secondEntry.getBoundingClientRect();
+            entryHeight = secondRect.top - firstRect.top;
+        } else if (firstEntry) {
+            entryHeight = firstEntry.offsetHeight + 15; // estimate gap
+        }
+
+        console.log('Entry height calculated:', entryHeight);
+
+        // Apply transforms to move entries to final positions
+        entries.forEach((entry, i) => {
             const initialIndex = parseInt(entry.getAttribute('data-initial-index'));
             const finalIndex = parseInt(entry.getAttribute('data-final-index'));
             const finalRank = entry.getAttribute('data-final-rank');
             const moveDistance = (finalIndex - initialIndex) * entryHeight;
+
+            console.log(`Player ${i}: initial=${initialIndex}, final=${finalIndex}, move=${moveDistance}px, finalRank=${finalRank}`);
 
             // Update the rank display
             const rankEl = entry.querySelector('.rank');
@@ -445,7 +483,7 @@ function updateRoundResultsScreen(data) {
                 entry.classList.add('rank-' + finalRank);
             }
 
-            // Highlight the total score
+            // Highlight the total score (make it pink and larger)
             const totalScoreEl = entry.querySelector('.total-score');
             if (totalScoreEl) {
                 totalScoreEl.classList.add('highlighted');
