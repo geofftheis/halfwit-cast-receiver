@@ -523,7 +523,8 @@ function updateGameResultsScreen(data) {
     leaderboard.innerHTML = '';
 
     data.players.forEach(player => {
-        leaderboard.appendChild(createLeaderboardEntry(player, false));
+        // On final results, don't show round score but highlight total score in pink
+        leaderboard.appendChild(createLeaderboardEntry(player, false, true));
     });
 }
 
