@@ -64,7 +64,7 @@ function parseEmojis(element) {
             twemoji.parse(element, {
                 folder: 'svg',
                 ext: '.svg',
-                base: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/'
+                base: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/'
             });
         } catch (e) {
             console.error('Twemoji parse error:', e);
