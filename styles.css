@@ -50,13 +50,13 @@ body {
 }
 
 .voter-icon img.emoji {
-    height: 24px;
-    width: 24px;
+    height: 48px;
+    width: 48px;
 }
 
 .abstain-icon img.emoji {
-    height: 20px;
-    width: 20px;
+    height: 40px;
+    width: 40px;
 }
 
 .trophy img.emoji {
@@ -461,12 +461,12 @@ body {
 }
 
 .voter-icon {
-    width: 36px;
-    height: 36px;
+    width: 56px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 48px;
 }
 
 .abstain-section {
@@ -488,12 +488,12 @@ body {
 }
 
 .abstain-icon {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 40px;
 }
 
 /* Round Results Screen */
