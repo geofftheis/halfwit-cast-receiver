@@ -181,6 +181,12 @@ function handleMessage(message) {
                 break;
 
             case 'loading':
+                updateLoadingScreen(data);
+                showScreen('loading');
+                break;
+
+            case 'loading_round':
+                updateLoadingRoundScreen(data);
                 showScreen('loading');
                 break;
 
@@ -247,6 +253,22 @@ function updateLobbyScreen(data) {
     data.players.forEach(player => {
         playerList.appendChild(createPlayerCard(player));
     });
+}
+
+/**
+ * Update loading screen for game start
+ */
+function updateLoadingScreen(data) {
+    const screen = screens.loading;
+    screen.querySelector('.status').textContent = 'Loading Game...';
+}
+
+/**
+ * Update loading screen for round loading
+ */
+function updateLoadingRoundScreen(data) {
+    const screen = screens.loading;
+    screen.querySelector('.status').textContent = 'Loading Round ' + data.roundNumber + '...';
 }
 
 /**
