@@ -146,20 +146,35 @@
 
         <!-- Game results screen -->
         <div id="game-results-screen" class="screen">
-            <div class="winner-section">
-                <div class="trophy">🏆</div>
-                <div class="winner-name"></div>
-                <div class="winner-label">Wins!</div>
-            </div>
-            <div class="final-standings">
-                <div class="standings-header">Final Standings</div>
-                <div class="leaderboard"></div>
+            <div class="game-results-container">
+                <!-- Left column: Winner and Half-Wit -->
+                <div class="results-left-column">
+                    <div class="winner-section">
+                        <img src="halfwit_winner.png" alt="Winner" class="results-graphic">
+                        <div class="name-row">
+                            <div class="winner-names"></div>
+                            <div class="winner-emoji"></div>
+                        </div>
+                    </div>
+                    <div class="loser-section">
+                        <img src="halfwit_loser.png" alt="Half-Wit" class="results-graphic loser-graphic">
+                        <div class="name-row">
+                            <div class="loser-names"></div>
+                            <div class="loser-emoji"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Right column: Full standings -->
+                <div class="results-right-column">
+                    <div class="standings-header">Final Standings</div>
+                    <div class="leaderboard"></div>
+                </div>
             </div>
         </div>
 
         <!-- End screen -->
         <div id="end-screen" class="screen">
-            <div class="logo">Half-Wit</div>
+            <img src="riffly_logo.png" alt="Half-Wit" class="logo-image">
             <div class="status">Thanks for playing!</div>
         </div>
     </div>

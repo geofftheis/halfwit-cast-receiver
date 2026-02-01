@@ -542,21 +542,31 @@ function updateRoundResultsScreen(data) {
 function updateGameResultsScreen(data) {
     const screen = screens.gameResults;
 
-    const trophy = screen.querySelector('.trophy');
-    const winnerName = screen.querySelector('.winner-name');
-    const winnerLabel = screen.querySelector('.winner-label');
-
-    if (data.isTie) {
-        trophy.textContent = '🤝';
-        winnerName.textContent = data.winnerName;
-        winnerLabel.textContent = "It's a Tie!";
-    } else {
-        trophy.textContent = '🏆';
-        winnerName.textContent = data.winnerName;
-        winnerLabel.textContent = 'Wins!';
+    // Update winner names
+    const winnerNames = screen.querySelector('.winner-names');
+    if (winnerNames) {
+        winnerNames.textContent = data.winnerName;
     }
-    // Parse trophy emoji to render as image
-    parseEmojis(trophy);
+
+    // Update winner emoji (trophy for single winner, handshake for tie)
+    const winnerEmoji = screen.querySelector('.winner-emoji');
+    if (winnerEmoji) {
+        winnerEmoji.textContent = data.isTie ? '🤝' : '🏆';
+        parseEmojis(winnerEmoji);
+    }
+
+    // Update loser names (player(s) with lowest score)
+    const loserNames = screen.querySelector('.loser-names');
+    if (loserNames) {
+        loserNames.textContent = data.loserName || '';
+    }
+
+    // Update loser emoji (sad face)
+    const loserEmoji = screen.querySelector('.loser-emoji');
+    if (loserEmoji) {
+        loserEmoji.textContent = '😢';
+        parseEmojis(loserEmoji);
+    }
 
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
