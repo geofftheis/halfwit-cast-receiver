@@ -20,18 +20,27 @@
 
         <!-- Lobby screen -->
         <div id="lobby-screen" class="screen">
-            <img src="riffly_logo.png" alt="Half-Wit" class="logo-image">
-            <div class="header">
-                <div class="game-name"></div>
-                <div class="host-info">Hosted by <span class="host-name"></span></div>
+            <div class="lobby-container">
+                <!-- Left column: Logo and game details -->
+                <div class="lobby-left-column">
+                    <img src="riffly_logo.png" alt="Half-Wit" class="logo-image">
+                    <div class="header">
+                        <div class="game-name"></div>
+                        <div class="host-info">Hosted by <span class="host-name"></span></div>
+                    </div>
+                    <div class="game-settings">
+                        <span class="player-count"></span>
+                        <span class="separator">|</span>
+                        <span class="round-count"></span>
+                    </div>
+                    <div class="waiting-message">Waiting for host to start...</div>
+                </div>
+                <!-- Right column: Players list -->
+                <div class="lobby-right-column">
+                    <div class="players-header">Players</div>
+                    <div class="player-list"></div>
+                </div>
             </div>
-            <div class="game-settings">
-                <span class="player-count"></span>
-                <span class="separator">|</span>
-                <span class="round-count"></span>
-            </div>
-            <div class="player-list"></div>
-            <div class="waiting-message">Waiting for host to start...</div>
         </div>
 
         <!-- Loading screen -->
