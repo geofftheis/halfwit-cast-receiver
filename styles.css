@@ -298,10 +298,14 @@ body {
 }
 
 /* Voting Transition Screen */
+#voting-transition-screen {
+    background: var(--riffly-lime);
+}
+
 #voting-transition-screen .big-text {
     font-size: 96px;
     font-weight: bold;
-    color: var(--riffly-lime);
+    color: var(--riffly-white);
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
     animation: pulse 1s ease-in-out infinite;
 }
