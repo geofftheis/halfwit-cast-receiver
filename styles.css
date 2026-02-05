@@ -367,7 +367,8 @@ body {
 }
 
 .prompt-card {
-    background: var(--riffly-lime);
+    background: var(--riffly-pink);
+    border: 3px solid var(--riffly-pink);
     border-radius: 16px;
     padding: 25px 40px;
     margin-bottom: 40px;
@@ -378,7 +379,7 @@ body {
 .prompt-text {
     font-size: 32px;
     font-weight: bold;
-    color: var(--riffly-dark);
+    color: var(--riffly-white);
     text-align: center;
 }
 
@@ -393,9 +394,9 @@ body {
 .answer-card {
     background: var(--riffly-card-bg);
     border-radius: 16px;
-    padding: 30px 40px;
-    width: 350px;
-    min-height: 150px;
+    padding: 40px 50px;
+    width: 450px;
+    min-height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -403,7 +404,7 @@ body {
 }
 
 .answer-card .answer-text {
-    font-size: 24px;
+    font-size: 28px;
     color: var(--riffly-dark);
     text-align: center;
 }
@@ -458,8 +459,8 @@ body {
 .result-card {
     background: var(--riffly-card-bg);
     border-radius: 16px;
-    padding: 25px 35px;
-    width: 380px;
+    padding: 35px 45px;
+    width: 480px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -469,16 +470,16 @@ body {
 }
 
 .result-card .player-name {
-    font-size: 18px;
+    font-size: 22px;
     color: var(--riffly-teal);
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .result-card .answer-text {
-    font-size: 22px;
+    font-size: 26px;
     color: var(--riffly-dark);
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .result-card .result-footer {
