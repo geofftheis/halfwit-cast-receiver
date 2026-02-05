@@ -682,6 +682,10 @@ body {
     margin-bottom: 30px;
 }
 
+#end-screen .logo-image {
+    height: 420px;  /* Twice the normal logo size */
+}
+
 #end-screen .status {
     font-size: 36px;
 }
