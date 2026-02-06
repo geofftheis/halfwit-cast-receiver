@@ -108,9 +108,9 @@ body {
     margin-bottom: 20px;
 }
 
-/* Connecting screen logo - same size as lobby */
+/* Connecting screen logo - twice the normal size */
 .logo-image.connecting-logo {
-    height: 210px;
+    height: 420px;
     margin-bottom: 30px;
 }
 
