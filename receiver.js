@@ -1,12 +1,12 @@
 /**
- * Riffly Cast Receiver
+ * Half-Wit Cast Receiver
  *
- * This receiver app displays game state on a TV when cast from the Riffly Android app.
+ * This receiver app displays game state on a TV when cast from the Half-Wit Android app.
  * It receives JSON messages via the custom namespace and renders the appropriate screen.
  */
 
-// Custom namespace for Riffly game messages
-const RIFFLY_NAMESPACE = 'urn:x-cast:com.riffly.game';
+// Custom namespace for Half-Wit game messages
+const HALFWIT_NAMESPACE = 'urn:x-cast:com.halfwit.game';
 
 // Screen elements
 const screens = {
@@ -581,7 +581,7 @@ function updateGameResultsScreen(data) {
  * Initialize the Cast Receiver
  */
 function initReceiver() {
-    console.log('Initializing Riffly Cast Receiver');
+    console.log('Initializing Half-Wit Cast Receiver');
 
     const context = cast.framework.CastReceiverContext.getInstance();
     const options = new cast.framework.CastReceiverOptions();
@@ -590,7 +590,7 @@ function initReceiver() {
     options.disableIdleTimeout = true;
 
     // Set up custom message listener
-    context.addCustomMessageListener(RIFFLY_NAMESPACE, (event) => {
+    context.addCustomMessageListener(HALFWIT_NAMESPACE, (event) => {
         console.log('Custom message received:', event);
         if (event.data) {
             handleMessage(typeof event.data === 'string' ? event.data : JSON.stringify(event.data));

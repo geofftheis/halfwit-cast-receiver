@@ -1,11 +1,11 @@
-# Riffly Cast Receiver
+# Half-Wit Cast Receiver
 
-This is the Chromecast receiver app for Riffly. It displays game content on a TV when cast from the Riffly Android app.
+This is the Chromecast receiver app for Half-Wit. It displays game content on a TV when cast from the Half-Wit Android app.
 
 ## Files
 
 - `index.html` - Main HTML structure with all screen layouts
-- `styles.css` - Riffly-branded styling
+- `styles.css` - Half-Wit-branded styling
 - `receiver.js` - Cast receiver logic and message handling
 
 ## Setup Instructions
@@ -13,7 +13,7 @@ This is the Chromecast receiver app for Riffly. It displays game content on a TV
 ### 1. Create a GitHub Repository
 
 1. Go to https://github.com/new
-2. Create a **public** repository named `riffly-cast-receiver`
+2. Create a **public** repository named `halfwit-cast-receiver`
 3. Don't initialize with README (we already have files)
 
 ### 2. Push the Receiver Files
@@ -26,17 +26,17 @@ git init
 git add .
 git commit -m "Initial cast receiver implementation"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/riffly-cast-receiver.git
+git remote add origin https://github.com/YOUR_USERNAME/halfwit-cast-receiver.git
 git push -u origin main
 ```
 
 ### 3. Enable GitHub Pages
 
-1. Go to your repository settings: `https://github.com/YOUR_USERNAME/riffly-cast-receiver/settings`
+1. Go to your repository settings: `https://github.com/YOUR_USERNAME/halfwit-cast-receiver/settings`
 2. Scroll down to "Pages" section
 3. Under "Source", select `main` branch
 4. Click "Save"
-5. Your receiver will be available at: `https://YOUR_USERNAME.github.io/riffly-cast-receiver/`
+5. Your receiver will be available at: `https://YOUR_USERNAME.github.io/halfwit-cast-receiver/`
 
 ### 4. Register a Custom Web Receiver
 
@@ -46,14 +46,14 @@ git push -u origin main
 4. Click "Add New Application"
 5. Select "Custom Receiver"
 6. Fill in:
-   - **Name**: Riffly
-   - **Receiver Application URL**: `https://YOUR_USERNAME.github.io/riffly-cast-receiver/`
+   - **Name**: Half-Wit
+   - **Receiver Application URL**: `https://YOUR_USERNAME.github.io/halfwit-cast-receiver/`
 7. Click "Save"
 8. Copy the **Application ID** (looks like: `ABCD1234`)
 
 ### 5. Update the Android App
 
-Open `android/app/src/main/java/com/riffly/app/services/CastOptionsProvider.kt` and replace:
+Open `android/app/src/main/java/com/halfwit/app/services/CastOptionsProvider.kt` and replace:
 
 ```kotlin
 const val RECEIVER_APP_ID = "YOUR_RECEIVER_APP_ID"
