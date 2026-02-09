@@ -382,9 +382,13 @@ function updateMatchupResultsScreen(data) {
     const abstainSection = screen.querySelector('.abstain-section');
     const abstainIcons = screen.querySelector('.abstain-icons');
     abstainIcons.innerHTML = '';
+    abstainSection.classList.remove('winner');
 
     if (data.abstainVoters && data.abstainVoters.length > 0) {
         abstainSection.style.display = 'flex';
+        if (data.abstainVoters.length === maxVotes) {
+            abstainSection.classList.add('winner');
+        }
         data.abstainVoters.forEach(iconId => {
             abstainIcons.appendChild(createVoterIcon(iconId, true));
         });

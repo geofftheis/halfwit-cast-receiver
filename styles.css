@@ -252,8 +252,8 @@ body {
 
 .player-card.host::after {
     content: 'HOST';
-    background: var(--halfwit-lime);
-    color: var(--halfwit-dark);
+    background: var(--halfwit-pink);
+    color: var(--halfwit-white);
     font-size: 10px;
     font-weight: bold;
     padding: 2px 8px;
@@ -403,6 +403,14 @@ body {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
+.answer-card.answer-1 {
+    border: 3px solid var(--halfwit-pink);
+}
+
+.answer-card.answer-2 {
+    border: 3px solid var(--halfwit-lime);
+}
+
 .answer-card .answer-text {
     font-size: 28px;
     color: var(--halfwit-dark);
@@ -468,7 +476,12 @@ body {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-.result-card.winner {
+.result-card.result-1.winner {
+    border: 4px solid var(--halfwit-pink);
+    box-shadow: 0 0 20px rgba(233, 71, 159, 0.4);
+}
+
+.result-card.result-2.winner {
     border: 4px solid var(--halfwit-lime);
     box-shadow: 0 0 20px rgba(155, 197, 61, 0.4);
 }
@@ -535,6 +548,13 @@ body {
     align-items: center;
     gap: 15px;
     margin-top: 20px;
+    padding: 15px 20px;
+    border-radius: 16px;
+}
+
+.abstain-section.winner {
+    border: 4px solid var(--halfwit-dark);
+    background: var(--halfwit-card-bg);
 }
 
 .abstain-label {
