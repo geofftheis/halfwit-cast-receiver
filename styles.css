@@ -404,11 +404,11 @@ body {
 }
 
 .answer-card.answer-1 {
-    border: 3px solid var(--halfwit-pink);
+    border: 5px solid var(--halfwit-pink);
 }
 
 .answer-card.answer-2 {
-    border: 3px solid var(--halfwit-lime);
+    border: 5px solid var(--halfwit-lime);
 }
 
 .answer-card .answer-text {
@@ -477,12 +477,12 @@ body {
 }
 
 .result-card.result-1.winner {
-    border: 4px solid var(--halfwit-pink);
+    border: 7px solid var(--halfwit-pink);
     box-shadow: 0 0 20px rgba(233, 71, 159, 0.4);
 }
 
 .result-card.result-2.winner {
-    border: 4px solid var(--halfwit-lime);
+    border: 7px solid var(--halfwit-lime);
     box-shadow: 0 0 20px rgba(155, 197, 61, 0.4);
 }
 
@@ -553,7 +553,7 @@ body {
 }
 
 .abstain-section.winner {
-    border: 4px solid var(--halfwit-dark);
+    border: 7px solid var(--halfwit-dark);
     background: var(--halfwit-card-bg);
 }
 
