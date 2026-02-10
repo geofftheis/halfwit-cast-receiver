@@ -141,14 +141,14 @@ function createLeaderboardEntry(player, showRoundScore = true, highlightTotalSco
         scoreSection.appendChild(roundScore);
     }
 
-    // Score text below - "X Points" on final results, "Total Score: X Points" on round results
-    const totalScore = document.createElement('div');
-    totalScore.className = 'total-score' + (highlightTotalScore ? ' highlighted' : '');
-    const points = player.totalScore === 1 ? 'Point' : 'Points';
-    totalScore.textContent = highlightTotalScore
-        ? player.totalScore + ' ' + points
-        : 'Total Score: ' + player.totalScore + ' ' + points;
-    scoreSection.appendChild(totalScore);
+    if (highlightTotalScore) {
+        // Final game results: just "X Points"
+        const totalScore = document.createElement('div');
+        totalScore.className = 'total-score highlighted';
+        const points = player.totalScore === 1 ? 'Point' : 'Points';
+        totalScore.textContent = player.totalScore + ' ' + points;
+        scoreSection.appendChild(totalScore);
+    }
 
     entry.appendChild(rank);
     entry.appendChild(icon);
@@ -477,6 +477,7 @@ function updateRoundResultsScreen(data) {
         entry.setAttribute('data-initial-index', index);
         entry.setAttribute('data-final-index', finalIndex);
         entry.setAttribute('data-final-rank', finalRank);
+        entry.setAttribute('data-total-score', player.totalScore);
 
         leaderboard.appendChild(entry);
     });
@@ -526,10 +527,12 @@ function updateRoundResultsScreen(data) {
                 entry.classList.add('rank-' + finalRank);
             }
 
-            // Highlight the total score (make it pink and larger)
-            const totalScoreEl = entry.querySelector('.total-score');
-            if (totalScoreEl) {
-                totalScoreEl.classList.add('highlighted');
+            // Replace round score with "Game Total: Y Points" in same style
+            const roundScoreEl = entry.querySelector('.round-score');
+            if (roundScoreEl) {
+                const totalScoreVal = parseInt(entry.getAttribute('data-total-score'));
+                const pointsLabel = totalScoreVal === 1 ? 'Point' : 'Points';
+                roundScoreEl.textContent = 'Game Total: ' + totalScoreVal + ' ' + pointsLabel;
             }
 
             // Apply the transform animation
