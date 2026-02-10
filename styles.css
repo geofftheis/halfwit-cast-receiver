@@ -836,6 +836,11 @@ body {
     line-height: 1.4;
 }
 
+.tutorial-demo-text {
+    font-size: 36px;
+    line-height: 1.4;
+}
+
 .tutorial-ready-title {
     font-size: 56px;
     color: var(--halfwit-lime);
