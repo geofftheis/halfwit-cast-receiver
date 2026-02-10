@@ -394,9 +394,9 @@ body {
 .answer-card {
     background: var(--halfwit-card-bg);
     border-radius: 16px;
-    padding: 40px 50px;
-    width: 450px;
-    min-height: 200px;
+    padding: 50px 60px;
+    width: 550px;
+    min-height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -412,7 +412,7 @@ body {
 }
 
 .answer-card .answer-text {
-    font-size: 28px;
+    font-size: 32px;
     color: var(--halfwit-dark);
     text-align: center;
 }
@@ -471,8 +471,8 @@ body {
 .result-card {
     background: var(--halfwit-card-bg);
     border-radius: 16px;
-    padding: 35px 45px;
-    width: 480px;
+    padding: 40px 50px;
+    width: 580px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -494,7 +494,7 @@ body {
 }
 
 .result-card .answer-text {
-    font-size: 26px;
+    font-size: 30px;
     color: var(--halfwit-dark);
     margin-bottom: 20px;
 }
@@ -1121,7 +1121,7 @@ body {
 @media (min-width: 1920px) {
     .logo { font-size: 96px; }
     .prompt-text { font-size: 40px; }
-    .answer-card { width: 450px; padding: 40px 50px; }
-    .answer-card .answer-text { font-size: 30px; }
+    .answer-card { width: 550px; padding: 50px 60px; }
+    .answer-card .answer-text { font-size: 34px; }
     .leaderboard-entry { padding: 20px 30px; }
 }
