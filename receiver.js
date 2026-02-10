@@ -141,11 +141,13 @@ function createLeaderboardEntry(player, showRoundScore = true, highlightTotalSco
         scoreSection.appendChild(roundScore);
     }
 
-    // Smaller total score below (e.g., "Total Score: 6 Points")
+    // Score text below - "X Points" on final results, "Total Score: X Points" on round results
     const totalScore = document.createElement('div');
     totalScore.className = 'total-score' + (highlightTotalScore ? ' highlighted' : '');
     const points = player.totalScore === 1 ? 'Point' : 'Points';
-    totalScore.textContent = 'Total Score: ' + player.totalScore + ' ' + points;
+    totalScore.textContent = highlightTotalScore
+        ? player.totalScore + ' ' + points
+        : 'Total Score: ' + player.totalScore + ' ' + points;
     scoreSection.appendChild(totalScore);
 
     entry.appendChild(rank);
