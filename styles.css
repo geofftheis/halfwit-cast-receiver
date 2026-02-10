@@ -213,13 +213,13 @@ body {
     font-size: 36px;
     font-weight: bold;
     color: var(--halfwit-white);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 #lobby-screen .player-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     width: 100%;
     max-width: 400px;
 }
@@ -227,7 +227,7 @@ body {
 .player-card {
     background: var(--halfwit-card-bg);
     border-radius: 12px;
-    padding: 15px 25px;
+    padding: 12px 25px;
     display: flex;
     align-items: center;
     gap: 12px;
