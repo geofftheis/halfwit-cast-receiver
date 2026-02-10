@@ -761,6 +761,361 @@ body {
     font-size: 36px;
 }
 
+/* ==================== Tutorial Screen ==================== */
+
+#tutorial-screen {
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.tutorial-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.tutorial-step {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.tutorial-step.active {
+    display: flex;
+    opacity: 1;
+}
+
+.tutorial-step.fade-in {
+    animation: tutorialFadeIn 0.3s ease-in-out forwards;
+}
+
+.tutorial-step.fade-out {
+    animation: tutorialFadeOut 0.3s ease-in-out forwards;
+}
+
+@keyframes tutorialFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes tutorialFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Tutorial text styles */
+.tutorial-text {
+    color: var(--halfwit-white);
+    font-weight: bold;
+    text-align: center;
+}
+
+.tutorial-title {
+    font-size: 48px;
+}
+
+.tutorial-subtitle {
+    font-size: 36px;
+}
+
+.tutorial-body {
+    font-size: 30px;
+    line-height: 1.4;
+}
+
+.tutorial-ready-title {
+    font-size: 56px;
+    color: var(--halfwit-lime);
+    margin-bottom: 20px;
+}
+
+/* Logo in tutorial */
+.tutorial-logo {
+    height: 300px;
+    margin-bottom: 30px;
+}
+
+/* Highlighted text spans */
+.highlight-pink {
+    color: var(--halfwit-pink);
+    font-weight: 900;
+}
+
+.highlight-lime {
+    color: var(--halfwit-lime);
+    font-weight: 900;
+}
+
+.tutorial-underline {
+    text-decoration: underline;
+}
+
+/* Step 3: Rounds number */
+.tutorial-rounds-number {
+    font-size: 96px;
+    font-weight: 900;
+    color: var(--halfwit-lime);
+    margin: 20px 0;
+}
+
+@keyframes tutorialPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.tutorial-rounds-number {
+    animation: tutorialPulse 0.8s ease-in-out infinite;
+}
+
+/* Step 4: Two-column demo layout */
+.tutorial-demo-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    gap: 60px;
+    align-items: center;
+}
+
+.tutorial-demo-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.tutorial-demo-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px;
+}
+
+/* Mock prompt cards */
+.tutorial-mock-prompt {
+    background: var(--halfwit-pink);
+    border-radius: 12px;
+    padding: 20px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+.tutorial-mock-prompt.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tutorial-prompt-label {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--halfwit-white);
+    min-height: 28px;
+}
+
+.tutorial-text-field {
+    background: var(--halfwit-white);
+    border: 2px solid var(--halfwit-lime);
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 10px;
+    min-height: 48px;
+    position: relative;
+}
+
+.tutorial-placeholder {
+    color: #999;
+    font-size: 18px;
+}
+
+.tutorial-typed-text {
+    color: #1A1A2E;
+    font-size: 18px;
+    display: none;
+}
+
+.tutorial-text-field.has-text .tutorial-placeholder {
+    display: none;
+}
+
+.tutorial-text-field.has-text .tutorial-typed-text {
+    display: inline;
+}
+
+/* Mock submit button */
+.tutorial-submit-btn {
+    background: #888;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--halfwit-white);
+    opacity: 0;
+    transition: background 0.2s ease, transform 0.2s ease, opacity 0.3s ease;
+}
+
+.tutorial-submit-btn.visible {
+    opacity: 1;
+}
+
+.tutorial-submit-btn.enabled {
+    background: var(--halfwit-pink);
+}
+
+.tutorial-submit-btn.submitted {
+    background: var(--halfwit-lime);
+}
+
+/* Submitted text */
+.tutorial-submitted-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--halfwit-lime);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tutorial-submitted-text.visible {
+    opacity: 1;
+}
+
+/* Step 5: Horizontal VS layout */
+.tutorial-vs-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    width: 100%;
+}
+
+.tutorial-response-card {
+    background: var(--halfwit-card-bg);
+    border-radius: 16px;
+    padding: 40px 50px;
+    width: 400px;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+.tutorial-card-pink {
+    border: 5px solid var(--halfwit-pink);
+    transform: translateX(-100px);
+}
+
+.tutorial-card-pink.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.tutorial-card-green {
+    border: 5px solid var(--halfwit-lime);
+    transform: translateX(100px);
+}
+
+.tutorial-card-green.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.tutorial-vs-badge {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--halfwit-pink);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.tutorial-vs-badge.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.tutorial-response-text {
+    font-size: 28px;
+    color: var(--halfwit-dark);
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Step 6: +1 float animation */
+.tutorial-plus-one {
+    font-size: 96px;
+    font-weight: 900;
+    color: var(--halfwit-white);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    margin: 30px 0;
+}
+
+.tutorial-plus-one.float-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tutorial-plus-one.float-out {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* Remember text with shake */
+.tutorial-remember {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    margin-top: 40px;
+}
+
+.tutorial-remember.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@keyframes tutorialShake {
+    0% { transform: translateX(0); }
+    8% { transform: translateX(-8px); }
+    16% { transform: translateX(8px); }
+    25% { transform: translateX(-6px); }
+    33% { transform: translateX(6px); }
+    42% { transform: translateX(0); }
+    100% { transform: translateX(0); }
+}
+
+.tutorial-remember.shaking {
+    animation: tutorialShake 0.6s ease-in-out infinite;
+}
+
+/* Step 7: Get Ready pulse */
+#tutorial-step-7 .tutorial-ready-title,
+#tutorial-step-7 .tutorial-body {
+    animation: tutorialPulse 0.8s ease-in-out infinite;
+}
+
 /* Responsive adjustments for TV */
 @media (min-width: 1920px) {
     .logo { font-size: 96px; }

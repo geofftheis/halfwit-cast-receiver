@@ -43,6 +43,99 @@
             </div>
         </div>
 
+        <!-- Tutorial screen -->
+        <div id="tutorial-screen" class="screen">
+            <div class="tutorial-content">
+                <!-- Step 1: Welcome -->
+                <div class="tutorial-step" id="tutorial-step-1">
+                    <img src="halfwit_logo.png" alt="Half-Wit" class="logo-image tutorial-logo">
+                    <div class="tutorial-text tutorial-title">Welcome to Half-Wit!</div>
+                </div>
+
+                <!-- Step 2: How it Works -->
+                <div class="tutorial-step" id="tutorial-step-2">
+                    <div class="tutorial-text tutorial-subtitle">Here's How it Works...</div>
+                </div>
+
+                <!-- Step 3: Rounds -->
+                <div class="tutorial-step" id="tutorial-step-3">
+                    <div class="tutorial-text tutorial-subtitle">This Game Will Consist of</div>
+                    <div class="tutorial-rounds-number"></div>
+                    <div class="tutorial-text tutorial-subtitle">Rounds</div>
+                </div>
+
+                <!-- Step 4: Prompts + Answering Demo (two-column layout) -->
+                <div class="tutorial-step" id="tutorial-step-4">
+                    <div class="tutorial-demo-container">
+                        <!-- Left column: text -->
+                        <div class="tutorial-demo-left">
+                            <div class="tutorial-text tutorial-body">
+                                You Will be Given <span class="highlight-pink">2 Prompts</span> at the Beginning of Each Round
+                            </div>
+                            <div class="tutorial-text tutorial-body" style="margin-top: 40px;">
+                                Answer BOTH Within the <span class="highlight-lime" id="tutorial-time-label"></span> Time Limit
+                            </div>
+                        </div>
+                        <!-- Right column: demo -->
+                        <div class="tutorial-demo-right">
+                            <div class="tutorial-mock-prompt" id="tutorial-prompt-1">
+                                <div class="tutorial-prompt-label"></div>
+                                <div class="tutorial-text-field">
+                                    <span class="tutorial-placeholder">Your answer (80 chars max)</span>
+                                    <span class="tutorial-typed-text"></span>
+                                </div>
+                            </div>
+                            <div class="tutorial-mock-prompt" id="tutorial-prompt-2">
+                                <div class="tutorial-prompt-label"></div>
+                                <div class="tutorial-text-field">
+                                    <span class="tutorial-placeholder">Your answer (80 chars max)</span>
+                                    <span class="tutorial-typed-text"></span>
+                                </div>
+                            </div>
+                            <div class="tutorial-submitted-text" id="tutorial-submitted-text">Submitted!</div>
+                            <div class="tutorial-submit-btn" id="tutorial-submit-btn">Submit Answers</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Matched Up (horizontal cards with vs) -->
+                <div class="tutorial-step" id="tutorial-step-5">
+                    <div class="tutorial-text tutorial-body" style="margin-bottom: 40px;">
+                        Your Responses will be <span class="highlight-lime">Matched Up</span> Against Another Player
+                    </div>
+                    <div class="tutorial-vs-container">
+                        <div class="tutorial-response-card tutorial-card-pink" id="tutorial-vs-pink">
+                            <div class="tutorial-response-text">A clever answer!</div>
+                        </div>
+                        <div class="tutorial-vs-badge" id="tutorial-vs-text">VS</div>
+                        <div class="tutorial-response-card tutorial-card-green" id="tutorial-vs-green">
+                            <div class="tutorial-response-text">My witty response</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Earn Points + Remember -->
+                <div class="tutorial-step" id="tutorial-step-6">
+                    <div class="tutorial-text tutorial-body">
+                        You <span class="highlight-lime">Earn Points</span> When Other Players Vote for Your Response
+                    </div>
+                    <div class="tutorial-plus-one" id="tutorial-plus-one">+1</div>
+                    <div class="tutorial-remember" id="tutorial-remember">
+                        <div class="tutorial-text tutorial-body">
+                            But Remember...<br><br>
+                            You <span class="highlight-pink tutorial-underline">Don't</span> Get to Vote on<br>Prompts You Answered
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 7: Get Ready -->
+                <div class="tutorial-step" id="tutorial-step-7">
+                    <div class="tutorial-text tutorial-ready-title">That's It!</div>
+                    <div class="tutorial-text tutorial-body">Now Get Your Wits About You<br>and Get Ready to Play!</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Loading screen -->
         <div id="loading-screen" class="screen">
             <img src="halfwit_logo.png" alt="Half-Wit" class="logo-image">

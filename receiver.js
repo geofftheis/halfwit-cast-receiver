@@ -12,6 +12,7 @@ const HALFWIT_NAMESPACE = 'urn:x-cast:com.halfwit.game';
 const screens = {
     connecting: document.getElementById('connecting-screen'),
     lobby: document.getElementById('lobby-screen'),
+    tutorial: document.getElementById('tutorial-screen'),
     loading: document.getElementById('loading-screen'),
     countdown: document.getElementById('countdown-screen'),
     answering: document.getElementById('answering-screen'),
@@ -29,6 +30,11 @@ let currentScreen = 'connecting';
  * Show a specific screen and hide all others
  */
 function showScreen(screenName) {
+    // If leaving the tutorial screen, clean up tutorial timeouts
+    if (currentScreen === 'tutorial' && screenName !== 'tutorial') {
+        clearTutorialTimeouts();
+    }
+
     Object.keys(screens).forEach(name => {
         if (screens[name]) {
             screens[name].classList.remove('active');
@@ -180,12 +186,21 @@ function handleMessage(message) {
                 showScreen('lobby');
                 break;
 
+            case 'tutorial':
+                startTutorial(data);
+                break;
+
             case 'loading':
                 updateLoadingScreen(data);
                 showScreen('loading');
                 break;
 
             case 'loading_round':
+                // Don't interrupt the tutorial with loading_round rebroadcasts
+                if (tutorialRunning && currentScreen === 'tutorial') {
+                    console.log('Tutorial running, ignoring loading_round');
+                    break;
+                }
                 updateLoadingRoundScreen(data);
                 showScreen('loading');
                 break;
@@ -579,6 +594,341 @@ function updateGameResultsScreen(data) {
         // On final results, don't show round score but highlight total score in pink
         leaderboard.appendChild(createLeaderboardEntry(player, false, true));
     });
+}
+
+// ==================== Tutorial Animation ====================
+
+// Track tutorial state to prevent duplicate runs
+let tutorialRunning = false;
+let tutorialTimeouts = [];
+
+/**
+ * Clear all pending tutorial timeouts
+ */
+function clearTutorialTimeouts() {
+    tutorialTimeouts.forEach(id => clearTimeout(id));
+    tutorialTimeouts = [];
+    tutorialRunning = false;
+}
+
+/**
+ * Schedule a timeout and track it for cleanup
+ */
+function tutorialTimeout(fn, delay) {
+    const id = setTimeout(fn, delay);
+    tutorialTimeouts.push(id);
+    return id;
+}
+
+/**
+ * Show a tutorial step with fade animation
+ */
+function showTutorialStep(stepNumber) {
+    // Hide all steps
+    for (let i = 1; i <= 7; i++) {
+        const step = document.getElementById('tutorial-step-' + i);
+        if (step) {
+            step.classList.remove('active', 'fade-in');
+            if (i !== stepNumber) {
+                step.classList.add('fade-out');
+            }
+        }
+    }
+
+    // Show the target step
+    tutorialTimeout(() => {
+        for (let i = 1; i <= 7; i++) {
+            const step = document.getElementById('tutorial-step-' + i);
+            if (step) {
+                step.classList.remove('active', 'fade-in', 'fade-out');
+                step.style.display = 'none';
+            }
+        }
+        const target = document.getElementById('tutorial-step-' + stepNumber);
+        if (target) {
+            target.style.display = 'flex';
+            target.classList.add('active', 'fade-in');
+        }
+    }, 300); // Wait for fade-out to complete
+}
+
+/**
+ * Typewriter effect - types text character by character
+ */
+function typeText(element, text, msPerChar, callback) {
+    let index = 0;
+    function typeNext() {
+        if (index < text.length) {
+            element.textContent += text[index];
+            index++;
+            tutorialTimeout(typeNext, msPerChar);
+        } else if (callback) {
+            callback();
+        }
+    }
+    typeNext();
+}
+
+/**
+ * Start the tutorial animation sequence
+ * Matches Android TutorialScreen.kt timing as closely as possible
+ */
+function startTutorial(data) {
+    // If tutorial is already running, ignore duplicate messages
+    if (tutorialRunning && currentScreen === 'tutorial') {
+        console.log('Tutorial already running, ignoring duplicate');
+        return;
+    }
+
+    // Clear any previous tutorial
+    clearTutorialTimeouts();
+    tutorialRunning = true;
+
+    const totalRounds = data.totalRounds || 3;
+    const answerTimeSeconds = data.answerTimeSeconds || 60;
+
+    // Format time label
+    let timeLabel;
+    if (answerTimeSeconds === 60) {
+        timeLabel = '1 Minute';
+    } else {
+        timeLabel = answerTimeSeconds + ' Second';
+    }
+
+    // Reset all tutorial step elements
+    for (let i = 1; i <= 7; i++) {
+        const step = document.getElementById('tutorial-step-' + i);
+        if (step) {
+            step.style.display = 'none';
+            step.classList.remove('active', 'fade-in', 'fade-out');
+        }
+    }
+
+    // Reset step 3: rounds number
+    const roundsNum = document.querySelector('.tutorial-rounds-number');
+    if (roundsNum) roundsNum.textContent = totalRounds;
+
+    // Reset step 4: demo elements
+    const timeEl = document.getElementById('tutorial-time-label');
+    if (timeEl) timeEl.textContent = timeLabel;
+
+    const prompt1 = document.getElementById('tutorial-prompt-1');
+    const prompt2 = document.getElementById('tutorial-prompt-2');
+    if (prompt1) {
+        prompt1.classList.remove('visible');
+        prompt1.querySelector('.tutorial-prompt-label').textContent = '';
+        const tf1 = prompt1.querySelector('.tutorial-text-field');
+        tf1.classList.remove('has-text');
+        tf1.querySelector('.tutorial-typed-text').textContent = '';
+    }
+    if (prompt2) {
+        prompt2.classList.remove('visible');
+        prompt2.querySelector('.tutorial-prompt-label').textContent = '';
+        const tf2 = prompt2.querySelector('.tutorial-text-field');
+        tf2.classList.remove('has-text');
+        tf2.querySelector('.tutorial-typed-text').textContent = '';
+    }
+
+    const submitBtn = document.getElementById('tutorial-submit-btn');
+    if (submitBtn) {
+        submitBtn.classList.remove('visible', 'enabled', 'submitted');
+    }
+    const submittedText = document.getElementById('tutorial-submitted-text');
+    if (submittedText) submittedText.classList.remove('visible');
+
+    // Reset step 5: VS cards
+    const vsPink = document.getElementById('tutorial-vs-pink');
+    const vsText = document.getElementById('tutorial-vs-text');
+    const vsGreen = document.getElementById('tutorial-vs-green');
+    if (vsPink) vsPink.classList.remove('visible');
+    if (vsText) vsText.classList.remove('visible');
+    if (vsGreen) vsGreen.classList.remove('visible');
+
+    // Reset step 6: earn points + remember
+    const plusOne = document.getElementById('tutorial-plus-one');
+    if (plusOne) plusOne.classList.remove('float-in', 'float-out');
+    const remember = document.getElementById('tutorial-remember');
+    if (remember) remember.classList.remove('visible', 'shaking');
+
+    // Show the tutorial screen
+    showScreen('tutorial');
+
+    // Timeline offset tracker
+    let t = 0;
+
+    // ===== Step 1: Welcome (0.0s – 1.75s) =====
+    const step1 = document.getElementById('tutorial-step-1');
+    step1.style.display = 'flex';
+    step1.classList.add('active', 'fade-in');
+    t += 1750;
+
+    // ===== Step 2: Here's How it Works (1.75s – 3.5s) =====
+    tutorialTimeout(() => showTutorialStep(2), t);
+    t += 1750;
+
+    // ===== Step 3: X Rounds (3.5s – 5.5s) =====
+    tutorialTimeout(() => showTutorialStep(3), t);
+    t += 2000;
+
+    // ===== Step 4: Prompts + Answering Demo (5.5s – ~15.0s) =====
+    tutorialTimeout(() => showTutorialStep(4), t);
+    const step4Start = t;
+    t += 1000; // Text appears, 1s before demo starts
+
+    // Show prompt cards (slide in)
+    tutorialTimeout(() => {
+        const p1 = document.getElementById('tutorial-prompt-1');
+        if (p1) p1.classList.add('visible');
+    }, t);
+    t += 200;
+
+    tutorialTimeout(() => {
+        const p2 = document.getElementById('tutorial-prompt-2');
+        if (p2) p2.classList.add('visible');
+    }, t);
+    t += 500;
+
+    // Show submit button (disabled)
+    tutorialTimeout(() => {
+        const btn = document.getElementById('tutorial-submit-btn');
+        if (btn) btn.classList.add('visible');
+    }, t);
+
+    // Type "Prompt 1" into card 1 label
+    tutorialTimeout(() => {
+        const label = document.querySelector('#tutorial-prompt-1 .tutorial-prompt-label');
+        if (label) typeText(label, 'Prompt 1', 60);
+    }, t);
+    t += 480 + 150; // 8 chars * 60ms + 150ms gap
+
+    // Type "Prompt 2" into card 2 label
+    tutorialTimeout(() => {
+        const label = document.querySelector('#tutorial-prompt-2 .tutorial-prompt-label');
+        if (label) typeText(label, 'Prompt 2', 60);
+    }, t);
+    t += 480 + 150;
+
+    // Type answer 1: "A clever answer!"
+    tutorialTimeout(() => {
+        const tf = document.querySelector('#tutorial-prompt-1 .tutorial-text-field');
+        const typed = document.querySelector('#tutorial-prompt-1 .tutorial-typed-text');
+        if (tf && typed) {
+            tf.classList.add('has-text');
+            typeText(typed, 'A clever answer!', 55);
+        }
+    }, t);
+    t += 16 * 55 + 150; // 16 chars * 55ms + gap
+
+    // Type answer 2: "My witty response"
+    tutorialTimeout(() => {
+        const tf = document.querySelector('#tutorial-prompt-2 .tutorial-text-field');
+        const typed = document.querySelector('#tutorial-prompt-2 .tutorial-typed-text');
+        if (tf && typed) {
+            tf.classList.add('has-text');
+            typeText(typed, 'My witty response', 55);
+        }
+    }, t);
+    t += 17 * 55 + 200; // 17 chars * 55ms + gap
+
+    // Button enables (gray → pink)
+    tutorialTimeout(() => {
+        const btn = document.getElementById('tutorial-submit-btn');
+        if (btn) btn.classList.add('enabled');
+    }, t);
+    t += 500;
+
+    // Button pressed (pink → green)
+    tutorialTimeout(() => {
+        const btn = document.getElementById('tutorial-submit-btn');
+        if (btn) {
+            btn.classList.remove('enabled');
+            btn.classList.add('submitted');
+        }
+    }, t);
+    t += 500;
+
+    // Show "Submitted!" text
+    tutorialTimeout(() => {
+        const st = document.getElementById('tutorial-submitted-text');
+        if (st) st.classList.add('visible');
+    }, t);
+    t += 700;
+
+    // Hold + fade out gap
+    t += 400;
+
+    // ===== Step 5: Matched Up (horizontal cards) =====
+    tutorialTimeout(() => showTutorialStep(5), t);
+    t += 1000 + 300; // 1s for text to appear + fade transition time
+
+    // Pink card flies in from left
+    tutorialTimeout(() => {
+        const card = document.getElementById('tutorial-vs-pink');
+        if (card) card.classList.add('visible');
+    }, t);
+    t += 600;
+
+    // "VS" appears
+    tutorialTimeout(() => {
+        const vs = document.getElementById('tutorial-vs-text');
+        if (vs) vs.classList.add('visible');
+    }, t);
+    t += 500;
+
+    // Green card flies in from right
+    tutorialTimeout(() => {
+        const card = document.getElementById('tutorial-vs-green');
+        if (card) card.classList.add('visible');
+    }, t);
+    t += 2600; // Hold for viewing
+
+    // ===== Step 6: Earn Points + Remember =====
+    tutorialTimeout(() => showTutorialStep(6), t);
+    t += 750 + 300; // Step text appears + fade transition
+
+    // +1 floats in
+    tutorialTimeout(() => {
+        const p1 = document.getElementById('tutorial-plus-one');
+        if (p1) p1.classList.add('float-in');
+    }, t);
+    t += 1000;
+
+    // +1 floats out
+    tutorialTimeout(() => {
+        const p1 = document.getElementById('tutorial-plus-one');
+        if (p1) {
+            p1.classList.remove('float-in');
+            p1.classList.add('float-out');
+        }
+    }, t);
+    t += 500;
+
+    // Remember text appears with shake
+    tutorialTimeout(() => {
+        const rem = document.getElementById('tutorial-remember');
+        if (rem) {
+            rem.classList.add('visible', 'shaking');
+        }
+    }, t);
+    t += 3750; // Hold for reading
+
+    // ===== Step 7: Get Ready! =====
+    tutorialTimeout(() => showTutorialStep(7), t);
+    t += 3000;
+
+    // Tutorial complete - show loading screen as fallback
+    tutorialTimeout(() => {
+        tutorialRunning = false;
+        console.log('Tutorial animation complete');
+        // Show loading screen with spinner while waiting for next phase
+        const loadingScreen = screens.loading;
+        if (loadingScreen) {
+            loadingScreen.querySelector('.status').textContent = 'Loading Round 1...';
+        }
+        showScreen('loading');
+    }, t);
+
+    console.log('Tutorial started, total duration: ' + t + 'ms');
 }
 
 /**
