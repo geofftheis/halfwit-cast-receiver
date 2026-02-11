@@ -447,8 +447,12 @@ function updateRoundResultsScreen(data) {
         player.displayRank = roundRank;
     });
 
-    // Sort by total score to get final rankings
-    const sortedByTotal = [...data.players].sort((a, b) => b.totalScore - a.totalScore);
+    // Sort by total score, then round score, then alphabetical for final rankings
+    const sortedByTotal = [...data.players].sort((a, b) => {
+        if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
+        if (b.roundScore !== a.roundScore) return b.roundScore - a.roundScore;
+        return a.name.localeCompare(b.name);
+    });
 
     // Assign final ranks based on total score
     let totalRank = 1;
