@@ -435,8 +435,12 @@ function updateRoundResultsScreen(data) {
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
 
-    // Sort players by round score (descending) for initial display
-    const sortedByRound = [...data.players].sort((a, b) => b.roundScore - a.roundScore);
+    // Sort players by round score (descending), then total score, then alphabetical for initial display
+    const sortedByRound = [...data.players].sort((a, b) => {
+        if (b.roundScore !== a.roundScore) return b.roundScore - a.roundScore;
+        if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
+        return a.name.localeCompare(b.name);
+    });
 
     // Assign initial ranks based on round score
     let roundRank = 1;
