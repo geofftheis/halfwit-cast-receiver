@@ -192,6 +192,16 @@ function handleMessage(message) {
                 startTutorial(data);
                 break;
 
+            case 'skip_tutorial':
+                console.log('Received skip_tutorial, clearing tutorial');
+                clearTutorialTimeouts();
+                var loadingScreenForSkip = screens.loading;
+                if (loadingScreenForSkip) {
+                    loadingScreenForSkip.querySelector('.status').textContent = 'Loading Round 1...';
+                }
+                showScreen('loading');
+                break;
+
             case 'loading':
                 updateLoadingScreen(data);
                 showScreen('loading');
