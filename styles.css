@@ -981,7 +981,7 @@ body {
 }
 
 .tutorial-submit-btn.enabled {
-    background: var(--halfwit-pink);
+    background: var(--halfwit-lime);
 }
 
 .tutorial-submit-btn.submitted {

@@ -832,16 +832,16 @@ function startTutorial(data) {
     }, t);
     t += 16 * 55 + 150; // 16 chars * 55ms + gap
 
-    // Type answer 2: "My witty response"
+    // Type answer 2: "A witty response"
     tutorialTimeout(() => {
         const tf = document.querySelector('#tutorial-prompt-2 .tutorial-text-field');
         const typed = document.querySelector('#tutorial-prompt-2 .tutorial-typed-text');
         if (tf && typed) {
             tf.classList.add('has-text');
-            typeText(typed, 'My witty response', 55);
+            typeText(typed, 'A witty response', 55);
         }
     }, t);
-    t += 17 * 55 + 200; // 17 chars * 55ms + gap
+    t += 16 * 55 + 200; // 16 chars * 55ms + gap
 
     // Button enables (gray → pink)
     tutorialTimeout(() => {
