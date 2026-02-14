@@ -139,13 +139,20 @@ function createLeaderboardEntry(player, showRoundScore = true, highlightTotalSco
         roundScore.className = 'round-score';
         roundScore.textContent = '+' + player.roundScore;
         scoreSection.appendChild(roundScore);
+
+        // Pre-create total score element (hidden) for crossfade during reorder
+        const totalScoreReplace = document.createElement('div');
+        totalScoreReplace.className = 'total-score-replace';
+        const pts = player.totalScore === 1 ? 'Pt' : 'Pts';
+        totalScoreReplace.textContent = player.totalScore + ' ' + pts;
+        scoreSection.appendChild(totalScoreReplace);
     }
 
     if (highlightTotalScore) {
-        // Final game results: just "X Points"
+        // Final game results: just "X Pts"
         const totalScore = document.createElement('div');
         totalScore.className = 'total-score highlighted';
-        const points = player.totalScore === 1 ? 'Point' : 'Points';
+        const points = player.totalScore === 1 ? 'Pt' : 'Pts';
         totalScore.textContent = player.totalScore + ' ' + points;
         scoreSection.appendChild(totalScore);
     }
@@ -502,9 +509,20 @@ function updateRoundResultsScreen(data) {
 
     console.log('Round results: initial order by round score, will animate in 3s');
 
+    // Reset the scores header for initial display
+    const scoresHeaderContainer = screen.querySelector('.scores-header-container');
+    if (scoresHeaderContainer) {
+        scoresHeaderContainer.classList.remove('transitioned');
+    }
+
     // After 3 seconds, animate to final positions sorted by total score
     roundResultsReorderTimeout = setTimeout(() => {
         console.log('Starting reorder animation');
+
+        // Start crossfade: fade out "Round Scores" immediately
+        if (scoresHeaderContainer) {
+            scoresHeaderContainer.classList.add('transitioned');
+        }
 
         const entries = Array.from(leaderboard.querySelectorAll('.leaderboard-entry'));
         if (entries.length === 0) {
@@ -545,12 +563,14 @@ function updateRoundResultsScreen(data) {
                 entry.classList.add('rank-' + finalRank);
             }
 
-            // Replace round score with "Game Total: Y Points" in same style
+            // Crossfade: fade out round score, fade in total score
             const roundScoreEl = entry.querySelector('.round-score');
             if (roundScoreEl) {
-                const totalScoreVal = parseInt(entry.getAttribute('data-total-score'));
-                const pointsLabel = totalScoreVal === 1 ? 'Point' : 'Points';
-                roundScoreEl.textContent = 'Game Total: ' + totalScoreVal + ' ' + pointsLabel;
+                roundScoreEl.style.opacity = '0';
+            }
+            const totalScoreReplace = entry.querySelector('.total-score-replace');
+            if (totalScoreReplace) {
+                totalScoreReplace.style.opacity = '1';
             }
 
             // Apply the transform animation
@@ -643,7 +663,7 @@ function createGameResultEntry(player, badge) {
 
     const totalScore = document.createElement('div');
     totalScore.className = 'total-score highlighted';
-    const points = player.totalScore === 1 ? 'Point' : 'Points';
+    const points = player.totalScore === 1 ? 'Pt' : 'Pts';
     totalScore.textContent = player.totalScore + ' ' + points;
     scoreSection.appendChild(totalScore);
 
