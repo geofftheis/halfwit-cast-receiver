@@ -1015,8 +1015,9 @@ function startTutorial(data) {
 
 /**
  * Scale the UI to fit the actual screen resolution.
- * All CSS is designed for 1920x1080. On lower-res TVs (e.g. 720p),
- * we scale the #app container down proportionally.
+ * All CSS is designed for 1920x1080. On lower-res displays (e.g. 720p),
+ * we scale all screen content down proportionally using CSS zoom.
+ * On 1080p or higher, no scaling is applied.
  */
 function scaleToFitViewport() {
     const designWidth = 1920;
@@ -1026,12 +1027,17 @@ function scaleToFitViewport() {
 
     const scaleX = viewportWidth / designWidth;
     const scaleY = viewportHeight / designHeight;
-    const scale = Math.min(scaleX, scaleY);
+    const scale = Math.min(scaleX, scaleY, 1.0); // Never scale up, only down
 
     const app = document.getElementById('app');
     if (app) {
-        app.style.transform = 'scale(' + scale + ')';
-        console.log('Viewport: ' + viewportWidth + 'x' + viewportHeight + ', scale: ' + scale.toFixed(3));
+        if (scale < 1.0) {
+            app.style.zoom = scale;
+            console.log('Viewport: ' + viewportWidth + 'x' + viewportHeight + ', zoom: ' + scale.toFixed(3));
+        } else {
+            app.style.zoom = '';
+            console.log('Viewport: ' + viewportWidth + 'x' + viewportHeight + ', no scaling needed');
+        }
     }
 }
 

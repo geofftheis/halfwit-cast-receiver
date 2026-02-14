@@ -65,12 +65,11 @@ body {
 }
 
 #app {
-    width: 1920px;
-    height: 1080px;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    transform-origin: top left;
 }
 
 /* Screen Management */
@@ -556,6 +555,10 @@ body {
 .abstain-section.winner {
     border: 7px solid var(--halfwit-dark);
     background: var(--halfwit-card-bg);
+}
+
+.abstain-section.winner .abstain-label {
+    color: var(--halfwit-dark);
 }
 
 .abstain-label {
