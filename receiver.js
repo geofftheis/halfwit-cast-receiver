@@ -584,39 +584,78 @@ function updateRoundResultsScreen(data) {
 function updateGameResultsScreen(data) {
     const screen = screens.gameResults;
 
-    // Update winner names
-    const winnerNames = screen.querySelector('.winner-names');
-    if (winnerNames) {
-        winnerNames.textContent = data.winnerName;
-    }
-
-    // Update winner emoji (trophy for single winner, handshake for tie)
-    const winnerEmoji = screen.querySelector('.winner-emoji');
-    if (winnerEmoji) {
-        winnerEmoji.textContent = data.isTie ? '🤝' : '🏆';
-        parseEmojis(winnerEmoji);
-    }
-
-    // Update loser names (player(s) with lowest score)
-    const loserNames = screen.querySelector('.loser-names');
-    if (loserNames) {
-        loserNames.textContent = data.loserName || '';
-    }
-
-    // Update loser emoji (sad face)
-    const loserEmoji = screen.querySelector('.loser-emoji');
-    if (loserEmoji) {
-        loserEmoji.textContent = '😢';
-        parseEmojis(loserEmoji);
-    }
+    // Determine winner and loser ranks for badge display
+    const topRank = Math.min(...data.players.map(p => p.rank));
+    const bottomRank = Math.max(...data.players.map(p => p.rank));
 
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
 
     data.players.forEach(player => {
-        // On final results, don't show round score but highlight total score in pink
-        leaderboard.appendChild(createLeaderboardEntry(player, false, true));
+        // Determine badge: winner for top rank, half-wit for bottom rank
+        let badge = null;
+        if (player.rank === topRank) badge = 'winner';
+        else if (player.rank === bottomRank) badge = 'halfwit';
+
+        leaderboard.appendChild(createGameResultEntry(player, badge));
     });
+}
+
+/**
+ * Create a game result entry with optional winner/half-wit badge
+ */
+function createGameResultEntry(player, badge) {
+    const entry = document.createElement('div');
+    entry.className = 'leaderboard-entry rank-' + player.rank;
+    entry.setAttribute('data-player-id', player.peerId || player.name);
+
+    const rank = document.createElement('span');
+    rank.className = 'rank';
+    rank.textContent = '#' + player.rank;
+
+    const icon = document.createElement('span');
+    icon.className = 'icon';
+    icon.textContent = player.iconId;
+
+    const info = document.createElement('div');
+    info.className = 'player-info';
+
+    const nameRow = document.createElement('div');
+    nameRow.className = 'name-badge-row';
+
+    const name = document.createElement('span');
+    name.className = 'name';
+    name.textContent = player.name;
+    nameRow.appendChild(name);
+
+    if (badge) {
+        const badgeImg = document.createElement('img');
+        badgeImg.className = 'result-badge';
+        badgeImg.src = badge === 'winner' ? 'halfwit_winner.png' : 'halfwit_loser.png';
+        badgeImg.alt = badge === 'winner' ? 'Winner' : 'Half-Wit';
+        nameRow.appendChild(badgeImg);
+    }
+
+    info.appendChild(nameRow);
+
+    const scoreSection = document.createElement('div');
+    scoreSection.className = 'score-section';
+
+    const totalScore = document.createElement('div');
+    totalScore.className = 'total-score highlighted';
+    const points = player.totalScore === 1 ? 'Point' : 'Points';
+    totalScore.textContent = player.totalScore + ' ' + points;
+    scoreSection.appendChild(totalScore);
+
+    entry.appendChild(rank);
+    entry.appendChild(icon);
+    entry.appendChild(info);
+    entry.appendChild(scoreSection);
+
+    // Parse emojis to render as images
+    parseEmojis(icon);
+
+    return entry;
 }
 
 // ==================== Tutorial Animation ====================
