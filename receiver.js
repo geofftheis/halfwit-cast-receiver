@@ -1014,42 +1014,10 @@ function startTutorial(data) {
 }
 
 /**
- * Scale the UI to fit the actual screen resolution.
- * All CSS is designed for 1920x1080. On lower-res displays (e.g. 720p),
- * we scale all screen content down proportionally using CSS zoom.
- * On 1080p or higher, no scaling is applied.
- */
-function scaleToFitViewport() {
-    const designWidth = 1920;
-    const designHeight = 1080;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    const scaleX = viewportWidth / designWidth;
-    const scaleY = viewportHeight / designHeight;
-    const scale = Math.min(scaleX, scaleY, 1.0); // Never scale up, only down
-
-    const app = document.getElementById('app');
-    if (app) {
-        if (scale < 1.0) {
-            app.style.zoom = scale;
-            console.log('Viewport: ' + viewportWidth + 'x' + viewportHeight + ', zoom: ' + scale.toFixed(3));
-        } else {
-            app.style.zoom = '';
-            console.log('Viewport: ' + viewportWidth + 'x' + viewportHeight + ', no scaling needed');
-        }
-    }
-}
-
-/**
  * Initialize the Cast Receiver
  */
 function initReceiver() {
     console.log('Initializing Half-Wit Cast Receiver');
-
-    // Scale UI to fit the actual TV resolution
-    scaleToFitViewport();
-    window.addEventListener('resize', scaleToFitViewport);
 
     const context = cast.framework.CastReceiverContext.getInstance();
     const options = new cast.framework.CastReceiverOptions();
