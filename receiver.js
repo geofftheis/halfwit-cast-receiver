@@ -60,14 +60,54 @@ function updateTimerStyle(element, seconds, totalSeconds) {
     }
 }
 
+// ── Per-icon visual tuning ──────────────────────────────────────────
+// Each icon PNG has different amounts of transparent padding and visual
+// weight. These ratios were hand-tuned so every icon looks consistently
+// sized and centred. Values are fractions of the container size so they
+// scale proportionally to any display size. Matches Android/iOS tuning.
+const ICON_SIZE_RATIO = {
+    accordion: 44/56,
+    axolotl: 46/56, butterfly: 46/56, dumpster_fire: 46/56,
+    goldfish_bag: 46/56, jellyfish: 46/56,
+    cuckoo_clock: 48/56, mushroom: 48/56, telescope: 48/56,
+    cactus: 50/56, disco_ball: 50/56,
+    bonsai: 52/56, penguin: 52/56, rubber_duck: 52/56, ufo: 52/56,
+    snail: 57/56
+};
+const ICON_OFFSET_Y = {
+    axolotl: 3/56, cuckoo_clock: 1/56, disco_ball: 2/56, goldfish_bag: 2/56,
+    jellyfish: -2/56, mushroom: -2/56, penguin: -2/56,
+    cactus: -3/56, dumpster_fire: -3/56, rubber_duck: -3/56, snail: -3/56,
+    ufo: -7/56
+};
+const ICON_OFFSET_X = {
+    cuckoo_clock: 1/56, snail: 2/56, telescope: 2/56, rubber_duck: -1/56
+};
+const DEFAULT_SIZE_RATIO = 44/56;
+
 /**
- * Create an <img> element for a player icon
+ * Create an <img> element for a player icon, scaled and offset so it
+ * looks visually centred at any size.
  */
 function createIconImg(iconId) {
     const img = document.createElement('img');
     img.src = 'icons/' + iconId + '.png';
     img.alt = iconId.replace(/_/g, ' ');
     img.className = 'player-icon';
+
+    const scale = ICON_SIZE_RATIO[iconId] || DEFAULT_SIZE_RATIO;
+    const offX  = ICON_OFFSET_X[iconId] || 0;
+    const offY  = ICON_OFFSET_Y[iconId] || 0;
+
+    // scale() shrinks the image within its layout box (box stays full size).
+    // translate() offsets are relative to the element's own size after scale,
+    // so we convert our container-fraction offsets to element-fraction by
+    // dividing by scale: e.g. a 3/56 container offset on a 46/56-scaled
+    // image becomes (3/56)/(46/56) = 3/46 of the image's own size.
+    const txPct = scale !== 0 ? ((offX / scale) * 100).toFixed(2) : 0;
+    const tyPct = scale !== 0 ? ((offY / scale) * 100).toFixed(2) : 0;
+    img.style.transform = `scale(${scale.toFixed(4)}) translate(${txPct}%, ${tyPct}%)`;
+
     return img;
 }
 
