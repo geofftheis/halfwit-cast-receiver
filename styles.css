@@ -27,41 +27,32 @@ body {
     overflow: hidden;
 }
 
-/* Twemoji image styling - emojis are rendered as images for Chromecast compatibility */
-.icon img.emoji,
-.voter-icon img.emoji,
-.abstain-icon img.emoji,
-.trophy img.emoji {
+/* Player icon image sizing */
+.player-icon {
     height: 1em;
     width: 1em;
-    margin: 0 0.05em 0 0.1em;
     vertical-align: -0.1em;
 }
 
 /* Specific sizes for different contexts */
-.player-card .icon img.emoji {
+.player-card .icon .player-icon {
     height: 32px;
     width: 32px;
 }
 
-.leaderboard-entry .icon img.emoji {
+.leaderboard-entry .icon .player-icon {
     height: 32px;
     width: 32px;
 }
 
-.voter-icon img.emoji {
+.voter-icon .player-icon {
     height: 48px;
     width: 48px;
 }
 
-.abstain-icon img.emoji {
+.abstain-icon .player-icon {
     height: 40px;
     width: 40px;
-}
-
-.trophy img.emoji {
-    height: 96px;
-    width: 96px;
 }
 
 #app {

@@ -61,23 +61,14 @@ function updateTimerStyle(element, seconds, totalSeconds) {
 }
 
 /**
- * Parse emojis in an element using Twemoji (renders as images)
- * This ensures emojis display correctly on Chromecast devices
+ * Create an <img> element for a player icon
  */
-function parseEmojis(element) {
-    if (typeof twemoji !== 'undefined') {
-        try {
-            twemoji.parse(element, {
-                folder: 'svg',
-                ext: '.svg',
-                base: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/'
-            });
-        } catch (e) {
-            console.error('Twemoji parse error:', e);
-        }
-    } else {
-        console.warn('Twemoji not loaded');
-    }
+function createIconImg(iconId) {
+    const img = document.createElement('img');
+    img.src = 'icons/' + iconId + '.png';
+    img.alt = iconId.replace(/_/g, ' ');
+    img.className = 'player-icon';
+    return img;
 }
 
 /**
@@ -89,7 +80,7 @@ function createPlayerCard(player) {
 
     const icon = document.createElement('span');
     icon.className = 'icon';
-    icon.textContent = player.iconId;
+    icon.appendChild(createIconImg(player.iconId));
 
     const name = document.createElement('span');
     name.className = 'name';
@@ -97,9 +88,6 @@ function createPlayerCard(player) {
 
     card.appendChild(icon);
     card.appendChild(name);
-
-    // Parse emojis to render as images
-    parseEmojis(icon);
 
     return card;
 }
@@ -118,7 +106,7 @@ function createLeaderboardEntry(player, showRoundScore = true, highlightTotalSco
 
     const icon = document.createElement('span');
     icon.className = 'icon';
-    icon.textContent = player.iconId;
+    icon.appendChild(createIconImg(player.iconId));
 
     const info = document.createElement('div');
     info.className = 'player-info';
@@ -162,9 +150,6 @@ function createLeaderboardEntry(player, showRoundScore = true, highlightTotalSco
     entry.appendChild(info);
     entry.appendChild(scoreSection);
 
-    // Parse emojis to render as images
-    parseEmojis(icon);
-
     return entry;
 }
 
@@ -174,9 +159,7 @@ function createLeaderboardEntry(player, showRoundScore = true, highlightTotalSco
 function createVoterIcon(iconId, isAbstain = false) {
     const icon = document.createElement('span');
     icon.className = isAbstain ? 'abstain-icon' : 'voter-icon';
-    icon.textContent = iconId;
-    // Parse emojis to render as images
-    parseEmojis(icon);
+    icon.appendChild(createIconImg(iconId));
     return icon;
 }
 
@@ -635,7 +618,7 @@ function createGameResultEntry(player, badge) {
 
     const icon = document.createElement('span');
     icon.className = 'icon';
-    icon.textContent = player.iconId;
+    icon.appendChild(createIconImg(player.iconId));
 
     const info = document.createElement('div');
     info.className = 'player-info';
@@ -671,9 +654,6 @@ function createGameResultEntry(player, badge) {
     entry.appendChild(icon);
     entry.appendChild(info);
     entry.appendChild(scoreSection);
-
-    // Parse emojis to render as images
-    parseEmojis(icon);
 
     return entry;
 }
