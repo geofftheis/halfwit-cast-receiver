@@ -46,13 +46,13 @@ body {
 }
 
 .voter-icon .player-icon {
-    height: 48px;
-    width: 48px;
+    height: 96px;
+    width: 96px;
 }
 
 .abstain-icon .player-icon {
-    height: 40px;
-    width: 40px;
+    height: 80px;
+    width: 80px;
 }
 
 #app {
@@ -526,12 +526,12 @@ body {
 }
 
 .voter-icon {
-    width: 56px;
-    height: 56px;
+    width: 112px;
+    height: 112px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 48px;
+    font-size: 96px;
 }
 
 .abstain-section {
@@ -564,12 +564,12 @@ body {
 }
 
 .abstain-icon {
-    width: 48px;
-    height: 48px;
+    width: 96px;
+    height: 96px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 40px;
+    font-size: 80px;
 }
 
 /* Round Results Screen */
