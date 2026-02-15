@@ -514,6 +514,17 @@ body {
     color: var(--halfwit-lime);
 }
 
+.result-card .score-breakdown {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.result-card .score-breakdown .votes-line,
+.result-card .score-breakdown .bonus-line {
+    line-height: 1.4;
+}
+
 .voter-icon {
     width: 112px;
     height: 112px;

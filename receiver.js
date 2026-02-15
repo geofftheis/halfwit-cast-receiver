@@ -382,7 +382,14 @@ function updateMatchupResultsScreen(data) {
     const result1 = screen.querySelector('.result-1');
     result1.querySelector('.player-name').textContent = data.player1Name;
     result1.querySelector('.answer-text').textContent = data.answer1;
-    result1.querySelector('.points').textContent = data.player1Votes;
+    result1.querySelector('.points').textContent = data.player1TotalPoints !== undefined ? data.player1TotalPoints : data.player1Votes;
+    result1.querySelector('.votes').textContent = data.player1Votes;
+
+    // Show/hide bonus line based on whether player gets the matchup bonus
+    const bonusLine1 = result1.querySelector('.bonus-line');
+    if (bonusLine1) {
+        bonusLine1.style.display = data.player1GetsBonus ? 'block' : 'none';
+    }
 
     const voters1 = result1.querySelector('.voter-icons');
     voters1.innerHTML = '';
@@ -394,7 +401,14 @@ function updateMatchupResultsScreen(data) {
     const result2 = screen.querySelector('.result-2');
     result2.querySelector('.player-name').textContent = data.player2Name;
     result2.querySelector('.answer-text').textContent = data.answer2;
-    result2.querySelector('.points').textContent = data.player2Votes;
+    result2.querySelector('.points').textContent = data.player2TotalPoints !== undefined ? data.player2TotalPoints : data.player2Votes;
+    result2.querySelector('.votes').textContent = data.player2Votes;
+
+    // Show/hide bonus line based on whether player gets the matchup bonus
+    const bonusLine2 = result2.querySelector('.bonus-line');
+    if (bonusLine2) {
+        bonusLine2.style.display = data.player2GetsBonus ? 'block' : 'none';
+    }
 
     const voters2 = result2.querySelector('.voter-icons');
     voters2.innerHTML = '';
