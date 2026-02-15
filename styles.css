@@ -41,8 +41,8 @@ body {
 }
 
 .leaderboard-entry .icon .player-icon {
-    height: 32px;
-    width: 32px;
+    height: 48px;
+    width: 48px;
 }
 
 .voter-icon .player-icon {
@@ -649,7 +649,7 @@ body {
 }
 
 .leaderboard-entry .icon {
-    font-size: 32px;
+    font-size: 48px;
 }
 
 .leaderboard-entry .player-info {
