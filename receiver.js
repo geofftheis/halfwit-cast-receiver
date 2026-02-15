@@ -378,25 +378,11 @@ function updateMatchupResultsScreen(data) {
 
     screen.querySelector('.prompt-text').textContent = data.promptText;
 
-    const scoringStyle = data.scoringStyle || 'POINTS_PER_VOTE';
-    const showBreakdown = scoringStyle === 'VOTES_PLUS_BONUS';
-
     // Result 1
     const result1 = screen.querySelector('.result-1');
     result1.querySelector('.player-name').textContent = data.player1Name;
     result1.querySelector('.answer-text').textContent = data.answer1;
-    result1.querySelector('.points').textContent = data.player1TotalPoints !== undefined ? data.player1TotalPoints : data.player1Votes;
-    result1.querySelector('.votes').textContent = data.player1Votes;
-
-    // Show/hide score breakdown based on scoring style
-    const breakdown1 = result1.querySelector('.score-breakdown');
-    if (breakdown1) {
-        breakdown1.style.display = showBreakdown ? 'block' : 'none';
-        const bonusLine1 = breakdown1.querySelector('.bonus-line');
-        if (bonusLine1) {
-            bonusLine1.style.display = data.player1GetsBonus ? 'block' : 'none';
-        }
-    }
+    result1.querySelector('.points').textContent = data.player1Votes;
 
     const voters1 = result1.querySelector('.voter-icons');
     voters1.innerHTML = '';
@@ -408,18 +394,7 @@ function updateMatchupResultsScreen(data) {
     const result2 = screen.querySelector('.result-2');
     result2.querySelector('.player-name').textContent = data.player2Name;
     result2.querySelector('.answer-text').textContent = data.answer2;
-    result2.querySelector('.points').textContent = data.player2TotalPoints !== undefined ? data.player2TotalPoints : data.player2Votes;
-    result2.querySelector('.votes').textContent = data.player2Votes;
-
-    // Show/hide score breakdown based on scoring style
-    const breakdown2 = result2.querySelector('.score-breakdown');
-    if (breakdown2) {
-        breakdown2.style.display = showBreakdown ? 'block' : 'none';
-        const bonusLine2 = breakdown2.querySelector('.bonus-line');
-        if (bonusLine2) {
-            bonusLine2.style.display = data.player2GetsBonus ? 'block' : 'none';
-        }
-    }
+    result2.querySelector('.points').textContent = data.player2Votes;
 
     const voters2 = result2.querySelector('.voter-icons');
     voters2.innerHTML = '';
