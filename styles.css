@@ -828,6 +828,10 @@ body {
     font-size: 36px;
 }
 
+#tutorial-step-2 .tutorial-subtitle {
+    font-size: 48px;
+}
+
 .tutorial-body {
     font-size: 30px;
     line-height: 1.4;
