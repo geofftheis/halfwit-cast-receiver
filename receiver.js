@@ -464,6 +464,9 @@ function updateRoundResultsScreen(data) {
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
 
+    // Use compact layout when 6+ players so all entries fit on screen
+    leaderboard.classList.toggle('compact', data.players.length >= 6);
+
     // Sort players by round score (descending), then total score, then alphabetical for initial display
     const sortedByRound = [...data.players].sort((a, b) => {
         if (b.roundScore !== a.roundScore) return b.roundScore - a.roundScore;
@@ -622,6 +625,9 @@ function updateGameResultsScreen(data) {
 
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
+
+    // Use compact layout when 6+ players so all entries fit on screen
+    leaderboard.classList.toggle('compact', data.players.length >= 6);
 
     data.players.forEach(player => {
         // Determine badge: winner for top rank, half-wit for bottom rank

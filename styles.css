@@ -708,6 +708,39 @@ body {
     opacity: 1;
 }
 
+/* Compact leaderboard for 6+ players */
+.leaderboard.compact {
+    gap: 8px;
+}
+
+.leaderboard.compact .leaderboard-entry {
+    padding: 8px 20px;
+    gap: 14px;
+}
+
+.leaderboard.compact .leaderboard-entry .rank {
+    font-size: 22px;
+    width: 40px;
+}
+
+.leaderboard.compact .leaderboard-entry .icon .player-icon {
+    height: 36px;
+    width: 36px;
+}
+
+.leaderboard.compact .leaderboard-entry .name {
+    font-size: 18px;
+}
+
+.leaderboard.compact .leaderboard-entry .round-score,
+.leaderboard.compact .leaderboard-entry .total-score-replace {
+    font-size: 28px;
+}
+
+.leaderboard.compact .leaderboard-entry .total-score.highlighted {
+    font-size: 15px;
+}
+
 /* Game Results Screen */
 #game-results-screen {
     padding: 40px;
