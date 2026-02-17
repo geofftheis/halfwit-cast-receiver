@@ -465,7 +465,7 @@ body {
 .result-card {
     background: var(--halfwit-card-bg);
     border-radius: 16px;
-    padding: 40px 50px;
+    padding: 28px 32px;
     width: 580px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
@@ -506,9 +506,9 @@ body {
     display: flex;
     gap: 6px;
     flex-wrap: nowrap;
-    margin-top: 16px;
-    margin-left: -35px;
-    margin-bottom: -24px;
+    margin-top: 12px;
+    margin-left: -16px;
+    margin-bottom: -12px;
 }
 
 .result-card .score-section {
