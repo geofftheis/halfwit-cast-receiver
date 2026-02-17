@@ -506,8 +506,9 @@ body {
     display: flex;
     gap: 6px;
     flex-wrap: nowrap;
-    margin-top: 8px;
-    margin-left: -12px;
+    margin-top: 16px;
+    margin-left: -35px;
+    margin-bottom: -24px;
 }
 
 .result-card .score-section {
