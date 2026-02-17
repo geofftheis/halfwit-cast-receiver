@@ -158,7 +158,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding-top: 40px;
+    padding-top: 10px;
 }
 
 #lobby-screen .logo-image {
@@ -204,7 +204,7 @@ body {
     font-size: 36px;
     font-weight: bold;
     color: var(--halfwit-white);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 #lobby-screen .player-list {
@@ -245,10 +245,10 @@ body {
     content: 'HOST';
     background: var(--halfwit-pink);
     color: var(--halfwit-white);
-    font-size: 10px;
+    font-size: 18px;
     font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 4px;
+    padding: 4px 14px;
+    border-radius: 7px;
     margin-left: 8px;
 }
 
