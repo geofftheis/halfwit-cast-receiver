@@ -868,7 +868,7 @@ function startTutorial(data) {
     // ===== Step 4: Prompts + Answering Demo (5.5s – ~15.0s) =====
     tutorialTimeout(() => showTutorialStep(4), t);
     const step4Start = t;
-    t += 1000; // Text appears, 1s before demo starts
+    t += 2000; // Text appears, 2s before demo starts
 
     // Show prompt cards (slide in)
     tutorialTimeout(() => {
