@@ -36,13 +36,13 @@ body {
 
 /* Specific sizes for different contexts */
 .player-card .icon .player-icon {
-    height: 32px;
-    width: 32px;
+    height: 44px;
+    width: 44px;
 }
 
 .leaderboard-entry .icon .player-icon {
-    height: 48px;
-    width: 48px;
+    height: 60px;
+    width: 60px;
 }
 
 .voter-icon .player-icon {
@@ -228,11 +228,11 @@ body {
 }
 
 .player-card .icon {
-    font-size: 32px;
+    font-size: 44px;
 }
 
 .player-card .name {
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 600;
     flex: 1;
 }
@@ -654,7 +654,7 @@ body {
 }
 
 .leaderboard-entry .icon {
-    font-size: 48px;
+    font-size: 60px;
 }
 
 .leaderboard-entry .player-info {
@@ -662,7 +662,7 @@ body {
 }
 
 .leaderboard-entry .name {
-    font-size: 22px;
+    font-size: 28px;
     font-weight: 600;
 }
 
@@ -723,12 +723,12 @@ body {
 }
 
 .leaderboard.compact .leaderboard-entry .icon .player-icon {
-    height: 36px;
-    width: 36px;
+    height: 44px;
+    width: 44px;
 }
 
 .leaderboard.compact .leaderboard-entry .name {
-    font-size: 18px;
+    font-size: 22px;
 }
 
 .leaderboard.compact .leaderboard-entry .round-score,
