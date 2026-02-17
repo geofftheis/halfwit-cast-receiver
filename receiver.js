@@ -835,9 +835,13 @@ function startTutorial(data) {
     if (vsText) vsText.classList.remove('visible');
     if (vsGreen) vsGreen.classList.remove('visible');
 
-    // Reset step 6: earn points + remember
+    // Reset step 6: earn points + bonus + remember
     const plusOne = document.getElementById('tutorial-plus-one');
     if (plusOne) plusOne.classList.remove('float-in', 'float-out');
+    const bonusText = document.getElementById('tutorial-bonus-text');
+    if (bonusText) bonusText.classList.remove('visible');
+    const plusOneBonus = document.getElementById('tutorial-plus-one-bonus');
+    if (plusOneBonus) plusOneBonus.classList.remove('float-in', 'float-out');
     const remember = document.getElementById('tutorial-remember');
     if (remember) remember.classList.remove('visible', 'shaking');
 
@@ -973,23 +977,47 @@ function startTutorial(data) {
     }, t);
     t += 2600; // Hold for viewing
 
-    // ===== Step 6: Earn Points + Remember =====
+    // ===== Step 6: Earn Points + Bonus + Remember =====
     tutorialTimeout(() => showTutorialStep(6), t);
-    t += 750 + 300; // Step text appears + fade transition
+    t += 750; // Earn points text appears
 
-    // +1 floats in
+    // First +1 floats in
     tutorialTimeout(() => {
         const p1 = document.getElementById('tutorial-plus-one');
         if (p1) p1.classList.add('float-in');
     }, t);
     t += 1000;
 
-    // +1 floats out
+    // First +1 floats out
     tutorialTimeout(() => {
         const p1 = document.getElementById('tutorial-plus-one');
         if (p1) {
             p1.classList.remove('float-in');
             p1.classList.add('float-out');
+        }
+    }, t);
+    t += 500;
+
+    // Bonus text fades in
+    tutorialTimeout(() => {
+        const bt = document.getElementById('tutorial-bonus-text');
+        if (bt) bt.classList.add('visible');
+    }, t);
+    t += 750;
+
+    // Second +1 (bonus) floats in
+    tutorialTimeout(() => {
+        const p2 = document.getElementById('tutorial-plus-one-bonus');
+        if (p2) p2.classList.add('float-in');
+    }, t);
+    t += 1000;
+
+    // Second +1 (bonus) floats out
+    tutorialTimeout(() => {
+        const p2 = document.getElementById('tutorial-plus-one-bonus');
+        if (p2) {
+            p2.classList.remove('float-in');
+            p2.classList.add('float-out');
         }
     }, t);
     t += 500;

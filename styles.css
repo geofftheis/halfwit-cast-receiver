@@ -560,7 +560,7 @@ body {
 
 .abstain-label {
     font-size: 28px;
-    color: var(--halfwit-white);
+    color: var(--halfwit-pink);
     opacity: 0.7;
 }
 
@@ -1064,6 +1064,14 @@ body {
     font-weight: 500;
 }
 
+/* Step 6: fixed-height container for +1 animations (reserves space after fade-out) */
+.tutorial-plus-one-container {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Step 6: +1 float animation */
 .tutorial-plus-one {
     font-size: 96px;
@@ -1072,7 +1080,6 @@ body {
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.4s ease, transform 0.4s ease;
-    margin: 30px 0;
 }
 
 .tutorial-plus-one.float-in {
@@ -1086,12 +1093,23 @@ body {
     transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
+/* Step 6: Bonus text (fades in) */
+.tutorial-bonus-text {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    margin: 8px 0;
+}
+
+.tutorial-bonus-text.visible {
+    opacity: 1;
+}
+
 /* Remember text with shake */
 .tutorial-remember {
     opacity: 0;
     transform: scale(0.8);
     transition: opacity 0.4s ease, transform 0.4s ease;
-    margin-top: 40px;
+    margin-top: 20px;
 }
 
 .tutorial-remember.visible {
