@@ -406,6 +406,9 @@ body {
     font-size: 32px;
     color: var(--halfwit-dark);
     text-align: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .vs-badge {
@@ -488,6 +491,9 @@ body {
     font-size: 30px;
     color: var(--halfwit-dark);
     margin-bottom: 20px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .result-card .result-footer {
@@ -732,11 +738,11 @@ body {
 .name-badge-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .result-badge {
-    height: 22px;
+    height: 48px;
     width: auto;
 }
 
