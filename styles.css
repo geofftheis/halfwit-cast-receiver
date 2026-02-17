@@ -46,13 +46,13 @@ body {
 }
 
 .voter-icon .player-icon {
-    height: 86px;
-    width: 86px;
+    height: 64px;
+    width: 64px;
 }
 
 .abstain-icon .player-icon {
-    height: 86px;
-    width: 86px;
+    height: 64px;
+    width: 64px;
 }
 
 #app {
@@ -504,9 +504,8 @@ body {
 
 .result-card .voter-icons {
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    flex: 1;
+    gap: 6px;
+    flex-wrap: nowrap;
 }
 
 .result-card .score-section {
@@ -532,12 +531,11 @@ body {
 }
 
 .voter-icon {
-    width: 101px;
-    height: 101px;
+    width: 64px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 96px;
 }
 
 .abstain-section {
@@ -570,12 +568,11 @@ body {
 }
 
 .abstain-icon {
-    width: 101px;
-    height: 101px;
+    width: 64px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 80px;
 }
 
 /* Round Results Screen */
