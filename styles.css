@@ -61,6 +61,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Overscan-safe area: keeps content away from TV edges that may be cropped */
+    padding: 48px 72px;
 }
 
 /* Screen Management */
@@ -71,7 +73,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px;
+    padding: 0;
     animation: fadeIn 0.3s ease-in-out;
 }
 
@@ -134,14 +136,14 @@ body {
 
 /* Lobby Screen */
 #lobby-screen {
-    padding: 40px;
+    padding: 0;
 }
 
 .lobby-container {
     display: flex;
     width: 100%;
     height: 100%;
-    gap: 60px;
+    gap: 40px;
 }
 
 .lobby-left-column {
@@ -291,7 +293,7 @@ body {
 #answering-screen .phase-label {
     font-size: 56px;
     color: var(--halfwit-white);
-    margin-bottom: 50px;
+    margin-bottom: 36px;
 }
 
 #answering-screen .round-number {
@@ -354,15 +356,15 @@ body {
 
 /* Matchup Voting Screen */
 #matchup-voting-screen {
-    padding: 30px;
+    padding: 0;
 }
 
 .prompt-card {
     background: var(--halfwit-pink);
     border: 3px solid var(--halfwit-pink);
     border-radius: 16px;
-    padding: 35px 50px;
-    margin-bottom: 40px;
+    padding: 28px 50px;
+    margin-bottom: 28px;
     max-width: 900px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
@@ -379,15 +381,15 @@ body {
     align-items: center;
     justify-content: center;
     gap: 30px;
-    margin-bottom: 40px;
+    margin-bottom: 28px;
 }
 
 .answer-card {
     background: var(--halfwit-card-bg);
     border-radius: 16px;
-    padding: 50px 60px;
-    width: 550px;
-    min-height: 220px;
+    padding: 40px 50px;
+    width: 520px;
+    min-height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -453,13 +455,13 @@ body {
 
 /* Matchup Results Screen */
 #matchup-results-screen {
-    padding: 30px;
+    padding: 0;
 }
 
 .results-container {
     display: flex;
-    gap: 40px;
-    margin-bottom: 30px;
+    gap: 30px;
+    margin-bottom: 20px;
 }
 
 .result-card {
@@ -580,7 +582,7 @@ body {
 
 /* Round Results Screen */
 #round-results-screen .results-header {
-    margin-bottom: 40px;
+    margin-bottom: 24px;
 }
 
 #round-results-screen .round-label {
@@ -743,7 +745,7 @@ body {
 
 /* Game Results Screen */
 #game-results-screen {
-    padding: 40px;
+    padding: 0;
 }
 
 .game-results-container {
@@ -758,7 +760,7 @@ body {
     font-size: 48px;
     font-weight: bold;
     color: var(--halfwit-white);
-    margin-bottom: 32px;
+    margin-bottom: 20px;
     text-align: center;
 }
 
@@ -795,7 +797,7 @@ body {
 /* ==================== Tutorial Screen ==================== */
 
 #tutorial-screen {
-    padding: 40px;
+    padding: 0;
     position: relative;
     overflow: hidden;
 }
@@ -1174,7 +1176,6 @@ body {
 @media (min-width: 1920px) {
     .logo { font-size: 96px; }
     .prompt-text { font-size: 40px; }
-    .answer-card { width: 550px; padding: 50px 60px; }
+    .answer-card { width: 520px; padding: 40px 50px; }
     .answer-card .answer-text { font-size: 34px; }
-    .leaderboard-entry { padding: 10px 30px; }
 }
