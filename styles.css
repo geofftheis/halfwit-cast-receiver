@@ -776,6 +776,14 @@ body {
     max-width: 700px;
 }
 
+#game-results-screen .leaderboard-entry .total-score.highlighted {
+    font-size: 28px;
+}
+
+#game-results-screen .leaderboard.compact .leaderboard-entry .total-score.highlighted {
+    font-size: 22px;
+}
+
 /* Badge displayed inline after player name in game results */
 .name-badge-row {
     display: flex;
