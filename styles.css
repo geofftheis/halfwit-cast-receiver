@@ -381,7 +381,7 @@ body {
 
 .answers-container {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     gap: 30px;
     margin-bottom: 28px;
@@ -421,6 +421,7 @@ body {
     font-weight: bold;
     color: var(--halfwit-white);
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    align-self: center;
 }
 
 .voting-footer {
@@ -463,6 +464,7 @@ body {
 
 .results-container {
     display: flex;
+    align-items: stretch;
     gap: 30px;
     margin-bottom: 20px;
 }
