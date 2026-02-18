@@ -1079,6 +1079,10 @@ function initReceiver() {
     // Handle sender connected — notify sender that receiver is ready for messages
     context.addEventListener(cast.framework.system.EventType.SENDER_CONNECTED, (event) => {
         console.log('Sender connected:', event);
+        // Reset to connecting screen to clear any stale state from a previous session
+        showScreen('connecting');
+        // Clear any running tutorial
+        clearTutorialTimeouts();
         // Send ready acknowledgment so sender knows receiver is listening
         context.sendCustomMessage(HALFWIT_NAMESPACE, event.senderId, JSON.stringify({ type: 'receiver_ready' }));
         console.log('Sent receiver_ready to sender:', event.senderId);
