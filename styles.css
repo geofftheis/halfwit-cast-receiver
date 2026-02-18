@@ -339,6 +339,9 @@ body {
 /* Voting Transition Screen */
 #voting-transition-screen {
     background: var(--halfwit-lime);
+    /* Extend lime background to fill #app overscan padding so no teal border shows */
+    margin: -36px -54px;
+    padding: calc(36px + 20px) calc(54px + 20px);
 }
 
 #voting-transition-screen .big-text {
