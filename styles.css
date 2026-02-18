@@ -472,9 +472,11 @@ body {
 .result-card {
     background: var(--halfwit-card-bg);
     border-radius: 16px;
-    padding: 28px 32px;
+    padding: 28px 32px 16px;
     width: 580px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
 }
 
 .result-card.result-1.winner {
@@ -497,7 +499,7 @@ body {
 .result-card .answer-text {
     font-size: 30px;
     color: var(--halfwit-dark);
-    margin-bottom: 20px;
+    margin-bottom: 8px;
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: 100%;
@@ -507,15 +509,16 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    margin-top: auto;
 }
 
 .result-card .voter-icons {
     display: flex;
     gap: 6px;
     flex-wrap: nowrap;
-    margin-top: 12px;
+    margin-top: 0;
     margin-left: -16px;
-    margin-bottom: -20px;
+    margin-bottom: -10px;
 }
 
 .result-card .score-section {
