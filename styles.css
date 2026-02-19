@@ -385,7 +385,7 @@ body {
     display: flex;
     align-items: stretch;
     justify-content: center;
-    gap: 30px;
+    gap: 24px;
     margin-bottom: 28px;
 }
 
@@ -393,7 +393,7 @@ body {
     background: var(--halfwit-card-bg);
     border-radius: 16px;
     padding: 40px 40px;
-    width: 480px;
+    width: 474px;
     min-height: 180px;
     display: flex;
     align-items: center;
