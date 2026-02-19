@@ -361,7 +361,7 @@ body {
     padding: 10px;
     /* Anchor content to top so the prompt isn't pushed above the overscan safe area */
     justify-content: flex-start;
-    padding-top: 20px;
+    padding-top: 13px;
 }
 
 .prompt-card {
