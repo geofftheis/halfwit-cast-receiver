@@ -359,9 +359,7 @@ body {
 /* Matchup Voting Screen */
 #matchup-voting-screen {
     padding: 10px;
-    /* Anchor content to top so the prompt isn't pushed above the overscan safe area */
-    justify-content: flex-start;
-    padding-top: 13px;
+    /* Inherit justify-content: center from .screen to vertically center all content */
 }
 
 .prompt-card {
