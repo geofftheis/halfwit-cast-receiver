@@ -135,9 +135,6 @@ body {
 }
 
 /* Lobby Screen */
-#lobby-screen {
-    padding: 10px;
-}
 
 .lobby-container {
     display: flex;
@@ -357,10 +354,6 @@ body {
 }
 
 /* Matchup Voting Screen */
-#matchup-voting-screen {
-    padding: 10px;
-    /* Inherit justify-content: center from .screen to vertically center all content */
-}
 
 .prompt-card {
     background: var(--halfwit-pink);
@@ -458,9 +451,6 @@ body {
 }
 
 /* Matchup Results Screen */
-#matchup-results-screen {
-    padding: 10px;
-}
 
 .results-container {
     display: flex;
@@ -752,9 +742,6 @@ body {
 }
 
 /* Game Results Screen */
-#game-results-screen {
-    padding: 10px;
-}
 
 .game-results-container {
     display: flex;
@@ -813,7 +800,6 @@ body {
 /* ==================== Tutorial Screen ==================== */
 
 #tutorial-screen {
-    padding: 10px;
     position: relative;
     overflow: hidden;
 }
