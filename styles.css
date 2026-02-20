@@ -384,7 +384,7 @@ body {
     background: var(--halfwit-card-bg);
     border-radius: 16px;
     padding: 40px 40px;
-    width: 470px;
+    width: 460px;
     min-height: 180px;
     display: flex;
     align-items: center;
@@ -463,7 +463,7 @@ body {
     background: var(--halfwit-card-bg);
     border-radius: 16px;
     padding: 28px 32px 16px;
-    width: 560px;
+    width: 540px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
@@ -1178,6 +1178,6 @@ body {
 @media (min-width: 1920px) {
     .logo { font-size: 96px; }
     .prompt-text { font-size: 40px; }
-    .answer-card { width: 520px; padding: 40px 50px; }
+    .answer-card { width: 460px; padding: 40px 50px; }
     .answer-card .answer-text { font-size: 34px; }
 }
