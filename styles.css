@@ -61,8 +61,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Overscan-safe area: keeps content away from TV edges that may be cropped */
-    padding: 36px 54px;
+    /* Title-safe area: 6% inset keeps content away from TV edges that may be cropped */
+    padding: 6%;
 }
 
 /* Screen Management */
@@ -73,7 +73,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 10px;
     animation: fadeIn 0.3s ease-in-out;
 }
 
