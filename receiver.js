@@ -204,6 +204,27 @@ function createVoterIcon(iconId, isAbstain = false) {
 }
 
 /**
+ * Set the height of a two-column leaderboard so flex-wrap fills left column first.
+ * Uses ceil(n/2) entries for the left column height.
+ */
+function setTwoColumnHeight(leaderboard, playerCount) {
+    if (playerCount < 5) {
+        leaderboard.style.height = '';
+        return;
+    }
+    // Wait for entries to render, then compute height from first entry
+    requestAnimationFrame(() => {
+        const entries = leaderboard.querySelectorAll('.leaderboard-entry');
+        if (entries.length === 0) return;
+        const entryRect = entries[0].getBoundingClientRect();
+        const gap = 10; // matches gap in CSS
+        const leftCount = Math.ceil(playerCount / 2);
+        const totalHeight = leftCount * entryRect.height + (leftCount - 1) * gap;
+        leaderboard.style.height = totalHeight + 'px';
+    });
+}
+
+/**
  * Handle incoming game messages
  */
 function handleMessage(message) {
@@ -526,6 +547,8 @@ function updateRoundResultsScreen(data) {
         leaderboard.appendChild(entry);
     });
 
+    setTwoColumnHeight(leaderboard, data.players.length);
+
     console.log('Round results: initial order by round score, will animate in 3s');
 
     // Reset the scores header for initial display
@@ -654,6 +677,8 @@ function updateGameResultsScreen(data) {
 
         leaderboard.appendChild(createGameResultEntry(player, badge));
     });
+
+    setTwoColumnHeight(leaderboard, data.players.length);
 }
 
 /**
