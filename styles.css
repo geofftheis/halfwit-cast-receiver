@@ -102,7 +102,7 @@ body {
 
 /* Connecting screen logo - twice the normal size */
 .logo-image.connecting-logo {
-    height: 420px;
+    height: 378px;  /* 10% smaller than 420px */
     margin-bottom: 30px;
 }
 
