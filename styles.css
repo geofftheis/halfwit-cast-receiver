@@ -130,7 +130,7 @@ body {
 
 /* Loading Screen */
 #loading-screen .logo-image {
-    height: 420px;  /* Twice the normal logo size */
+    height: 378px;  /* 10% smaller than 420px */
 }
 
 /* Lobby Screen */
@@ -867,7 +867,7 @@ body {
 }
 
 #end-screen .logo-image {
-    height: 420px;  /* Twice the normal logo size */
+    height: 378px;  /* 10% smaller than 420px */
 }
 
 #end-screen .status {
