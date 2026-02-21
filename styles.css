@@ -816,12 +816,37 @@ body {
     max-width: 700px;
 }
 
+#game-results-screen .leaderboard.two-column {
+    max-width: 100%;
+}
+
 #game-results-screen .leaderboard-entry .total-score.highlighted {
     font-size: 28px;
+    white-space: nowrap;
 }
 
 #game-results-screen .leaderboard.compact .leaderboard-entry .total-score.highlighted {
     font-size: 22px;
+}
+
+#game-results-screen .leaderboard.two-column .leaderboard-entry .total-score.highlighted {
+    font-size: 22px;
+    white-space: nowrap;
+}
+
+#game-results-screen .leaderboard.two-column .leaderboard-entry .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#game-results-screen .leaderboard.two-column .result-badge {
+    height: 28px;
+}
+
+#game-results-screen .leaderboard.two-column .name-badge-row {
+    gap: 8px;
+    min-width: 0;
 }
 
 /* Badge displayed inline after player name in game results */
