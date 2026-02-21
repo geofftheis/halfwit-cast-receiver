@@ -549,10 +549,30 @@ function updateRoundResultsScreen(data) {
 
     setTwoColumnHeight(leaderboard, data.players.length);
 
+    // Align scores header with leaderboard entries
+    const scoresHeaderContainer = screen.querySelector('.scores-header-container');
+    if (data.players.length >= 5) {
+        // In two-column mode, match header to actual leaderboard entry position
+        requestAnimationFrame(() => {
+            const firstEntry = leaderboard.querySelector('.leaderboard-entry');
+            if (firstEntry) {
+                const leaderboardRect = leaderboard.getBoundingClientRect();
+                const entryRect = firstEntry.getBoundingClientRect();
+                const leftOffset = entryRect.left - leaderboardRect.left;
+                scoresHeaderContainer.style.maxWidth = '100%';
+                scoresHeaderContainer.style.width = '100%';
+                scoresHeaderContainer.style.paddingLeft = leftOffset + 'px';
+            }
+        });
+    } else {
+        scoresHeaderContainer.style.maxWidth = '';
+        scoresHeaderContainer.style.width = '';
+        scoresHeaderContainer.style.paddingLeft = '';
+    }
+
     console.log('Round results: initial order by round score, will animate in 3s');
 
     // Reset the scores header for initial display
-    const scoresHeaderContainer = screen.querySelector('.scores-header-container');
     if (scoresHeaderContainer) {
         scoresHeaderContainer.classList.remove('transitioned');
     }
