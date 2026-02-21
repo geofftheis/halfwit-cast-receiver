@@ -239,6 +239,24 @@ body {
     border: 3px solid var(--halfwit-lime);
 }
 
+/* Compact lobby for 7-8 players */
+#lobby-screen .player-list.compact {
+    gap: 5px;
+}
+
+#lobby-screen .player-list.compact .player-card {
+    padding: 2px 20px;
+}
+
+#lobby-screen .player-list.compact .player-card .icon .player-icon {
+    height: 36px;
+    width: 36px;
+}
+
+#lobby-screen .player-list.compact .player-card .name {
+    font-size: 22px;
+}
+
 .player-card.host::after {
     content: 'HOST';
     background: var(--halfwit-pink);
@@ -740,6 +758,47 @@ body {
     font-size: 15px;
 }
 
+/* Two-column leaderboard for 5+ players */
+.leaderboard.two-column {
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-width: 100%;
+    gap: 10px 30px;
+}
+
+.leaderboard.two-column .leaderboard-entry {
+    width: calc(50% - 15px);
+    padding: 6px 16px;
+    gap: 12px;
+}
+
+.leaderboard.two-column .leaderboard-entry .rank {
+    font-size: 22px;
+    width: 40px;
+}
+
+.leaderboard.two-column .leaderboard-entry .icon .player-icon {
+    height: 44px;
+    width: 44px;
+}
+
+.leaderboard.two-column .leaderboard-entry .name {
+    font-size: 22px;
+}
+
+.leaderboard.two-column .leaderboard-entry .round-score,
+.leaderboard.two-column .leaderboard-entry .total-score-replace {
+    font-size: 28px;
+}
+
+.leaderboard.two-column .leaderboard-entry .total-score.highlighted {
+    font-size: 15px;
+}
+
+.leaderboard.two-column {
+    max-width: 100%;
+}
+
 /* Game Results Screen */
 
 .game-results-container {
@@ -779,7 +838,7 @@ body {
 }
 
 .result-badge {
-    height: 48px;
+    height: 41px;
     width: auto;
 }
 

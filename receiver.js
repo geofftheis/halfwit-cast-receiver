@@ -307,6 +307,9 @@ function updateLobbyScreen(data) {
     const playerList = screen.querySelector('.player-list');
     playerList.innerHTML = '';
 
+    // Use compact cards when 7+ players so all fit on screen
+    playerList.classList.toggle('compact', data.players.length >= 7);
+
     data.players.forEach(player => {
         playerList.appendChild(createPlayerCard(player));
     });
@@ -464,7 +467,8 @@ function updateRoundResultsScreen(data) {
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
 
-    // Use compact layout when 6+ players so all entries fit on screen
+    // Use two-column layout for 5+ players, compact for 6+
+    leaderboard.classList.toggle('two-column', data.players.length >= 5);
     leaderboard.classList.toggle('compact', data.players.length >= 6);
 
     // Sort players by round score (descending), then total score, then alphabetical for initial display
@@ -530,6 +534,8 @@ function updateRoundResultsScreen(data) {
         scoresHeaderContainer.classList.remove('transitioned');
     }
 
+    const isTwoColumn = data.players.length >= 5;
+
     // After 3 seconds, animate to final positions sorted by total score
     roundResultsReorderTimeout = setTimeout(() => {
         console.log('Starting reorder animation');
@@ -545,35 +551,14 @@ function updateRoundResultsScreen(data) {
             return;
         }
 
-        // Calculate entry height including gap
-        const firstEntry = entries[0];
-        const secondEntry = entries[1];
-        let entryHeight = 75; // default
-
-        if (firstEntry && secondEntry) {
-            const firstRect = firstEntry.getBoundingClientRect();
-            const secondRect = secondEntry.getBoundingClientRect();
-            entryHeight = secondRect.top - firstRect.top;
-        } else if (firstEntry) {
-            entryHeight = firstEntry.offsetHeight + 15; // estimate gap
-        }
-
-        console.log('Entry height calculated:', entryHeight);
-
-        // Apply transforms to move entries to final positions
-        entries.forEach((entry, i) => {
-            const initialIndex = parseInt(entry.getAttribute('data-initial-index'));
-            const finalIndex = parseInt(entry.getAttribute('data-final-index'));
+        // Update rank displays and crossfade scores for all entries
+        entries.forEach((entry) => {
             const finalRank = entry.getAttribute('data-final-rank');
-            const moveDistance = (finalIndex - initialIndex) * entryHeight;
-
-            console.log(`Player ${i}: initial=${initialIndex}, final=${finalIndex}, move=${moveDistance}px, finalRank=${finalRank}`);
 
             // Update the rank display
             const rankEl = entry.querySelector('.rank');
             if (rankEl) {
                 rankEl.textContent = '#' + finalRank;
-                // Update rank color class
                 entry.className = entry.className.replace(/rank-\d+/g, '');
                 entry.classList.add('rank-' + finalRank);
             }
@@ -587,28 +572,59 @@ function updateRoundResultsScreen(data) {
             if (totalScoreReplace) {
                 totalScoreReplace.style.opacity = '1';
             }
-
-            // Apply the transform animation
-            entry.style.transition = 'transform 0.8s ease-in-out';
-            entry.style.transform = `translateY(${moveDistance}px)`;
         });
 
-        // After animation completes, reorder DOM elements to fix spacing
-        setTimeout(() => {
-            console.log('Animation complete, reordering DOM');
-
-            // Sort entries by their final index
+        if (isTwoColumn) {
+            // Two-column layout: reorder DOM directly (translateY doesn't work with flex-wrap)
             const sortedEntries = entries.slice().sort((a, b) => {
                 return parseInt(a.getAttribute('data-final-index')) - parseInt(b.getAttribute('data-final-index'));
             });
 
-            // Remove transforms and reorder in DOM
             sortedEntries.forEach(entry => {
-                entry.style.transition = 'none';
-                entry.style.transform = 'none';
-                leaderboard.appendChild(entry); // Re-appending moves to end, so doing in order reorders them
+                leaderboard.appendChild(entry);
             });
-        }, 850); // Slightly after the 0.8s animation
+        } else {
+            // Single-column layout: use translateY animation
+            const firstEntry = entries[0];
+            const secondEntry = entries[1];
+            let entryHeight = 75; // default
+
+            if (firstEntry && secondEntry) {
+                const firstRect = firstEntry.getBoundingClientRect();
+                const secondRect = secondEntry.getBoundingClientRect();
+                entryHeight = secondRect.top - firstRect.top;
+            } else if (firstEntry) {
+                entryHeight = firstEntry.offsetHeight + 15; // estimate gap
+            }
+
+            console.log('Entry height calculated:', entryHeight);
+
+            entries.forEach((entry, i) => {
+                const initialIndex = parseInt(entry.getAttribute('data-initial-index'));
+                const finalIndex = parseInt(entry.getAttribute('data-final-index'));
+                const moveDistance = (finalIndex - initialIndex) * entryHeight;
+
+                console.log(`Player ${i}: initial=${initialIndex}, final=${finalIndex}, move=${moveDistance}px`);
+
+                entry.style.transition = 'transform 0.8s ease-in-out';
+                entry.style.transform = `translateY(${moveDistance}px)`;
+            });
+
+            // After animation completes, reorder DOM elements to fix spacing
+            setTimeout(() => {
+                console.log('Animation complete, reordering DOM');
+
+                const sortedEntries = entries.slice().sort((a, b) => {
+                    return parseInt(a.getAttribute('data-final-index')) - parseInt(b.getAttribute('data-final-index'));
+                });
+
+                sortedEntries.forEach(entry => {
+                    entry.style.transition = 'none';
+                    entry.style.transform = 'none';
+                    leaderboard.appendChild(entry);
+                });
+            }, 850);
+        }
 
     }, 3000);
 }
@@ -626,7 +642,8 @@ function updateGameResultsScreen(data) {
     const leaderboard = screen.querySelector('.leaderboard');
     leaderboard.innerHTML = '';
 
-    // Use compact layout when 6+ players so all entries fit on screen
+    // Use two-column layout for 5+ players, compact for 6+
+    leaderboard.classList.toggle('two-column', data.players.length >= 5);
     leaderboard.classList.toggle('compact', data.players.length >= 6);
 
     data.players.forEach(player => {
