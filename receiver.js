@@ -578,9 +578,14 @@ function updateRoundResultsScreen(data) {
     }
 
     const isTwoColumn = data.players.length >= 5;
+    const isFinalRound = data.roundNumber >= data.totalRounds;
 
     // After 3 seconds, animate to final positions sorted by total score
-    roundResultsReorderTimeout = setTimeout(() => {
+    // Skip transition on final round — the Game Results screen shows cumulative standings
+    if (isFinalRound) {
+        console.log('Final round: skipping reorder animation');
+    }
+    if (!isFinalRound) roundResultsReorderTimeout = setTimeout(() => {
         console.log('Starting reorder animation');
 
         // Start crossfade: fade out "Round Scores" immediately
