@@ -861,11 +861,13 @@ function startTutorial(data) {
     const answerTimeSeconds = data.answerTimeSeconds || 60;
 
     // Format time label
+    var minutes = Math.floor(answerTimeSeconds / 60);
+    var remainder = answerTimeSeconds % 60;
     let timeLabel;
-    if (answerTimeSeconds === 60) {
-        timeLabel = '1 Minute';
+    if (remainder === 0) {
+        timeLabel = minutes + ' Minute' + (minutes !== 1 ? 's' : '');
     } else {
-        timeLabel = answerTimeSeconds + ' Second';
+        timeLabel = minutes + '.' + Math.floor(remainder / 6) + ' Minutes';
     }
 
     // Reset all tutorial step elements
