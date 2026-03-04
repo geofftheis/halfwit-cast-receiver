@@ -325,6 +325,15 @@ function updateLobbyScreen(data) {
     screen.querySelector('.player-count').textContent = data.players.length + '/' + data.maxPlayers + ' players';
     screen.querySelector('.round-count').textContent = data.totalRounds + ' rounds';
 
+    // Answer time
+    var minutes = Math.floor(data.answerTimeSeconds / 60);
+    var tenths = Math.floor((data.answerTimeSeconds % 60) / 6);
+    screen.querySelector('.answer-time').textContent = minutes + '.' + tenths + ' Min to answer';
+
+    // Anonymous mode
+    var anonymousEl = screen.querySelector('.anonymous-mode');
+    anonymousEl.style.display = data.anonymousAnswers ? '' : 'none';
+
     const playerList = screen.querySelector('.player-list');
     playerList.innerHTML = '';
 

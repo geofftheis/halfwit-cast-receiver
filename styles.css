@@ -183,7 +183,6 @@ body {
 
 #lobby-screen .game-settings {
     font-size: 20px;
-    margin-bottom: 30px;
     color: var(--halfwit-white);
     opacity: 0.7;
 }
@@ -192,8 +191,17 @@ body {
     margin: 0 15px;
 }
 
+#lobby-screen .answer-time,
+#lobby-screen .anonymous-mode {
+    font-size: 20px;
+    color: var(--halfwit-white);
+    opacity: 0.7;
+    margin-bottom: 4px;
+}
+
 #lobby-screen .waiting-message {
     font-size: 24px;
+    margin-top: 20px;
     color: var(--halfwit-white);
     opacity: 0.7;
 }
