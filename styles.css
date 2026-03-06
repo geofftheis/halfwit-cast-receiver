@@ -494,6 +494,22 @@ body {
     opacity: 0.7;
 }
 
+/* Wider prompt + aligned result cards on results screen (matches voting screen) */
+#matchup-results-screen .prompt-card {
+    width: clamp(690px, 80.5vw, 1035px);
+    max-width: none;
+}
+
+#matchup-results-screen .results-container {
+    width: clamp(690px, 80.5vw, 1035px);
+}
+
+#matchup-results-screen .result-card {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+}
+
 /* Matchup Results Screen */
 
 .results-container {
