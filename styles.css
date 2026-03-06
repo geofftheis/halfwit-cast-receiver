@@ -531,11 +531,15 @@ body {
 
 .result-card .voter-icons {
     display: flex;
-    gap: clamp(4px, 0.5vw, 6px);
+    gap: 0;
     flex-wrap: nowrap;
     margin-top: 0;
     margin-left: clamp(-10px, -1.2vw, -16px);
     margin-bottom: clamp(-6px, -0.8vw, -10px);
+}
+
+.result-card .voter-icons .voter-icon + .voter-icon {
+    margin-left: clamp(-6px, -0.4vw, -4px);
 }
 
 .result-card .score-section {
@@ -590,7 +594,11 @@ body {
 
 .abstain-icons {
     display: flex;
-    gap: clamp(4px, 0.6vw, 8px);
+    gap: 0;
+}
+
+.abstain-icons .abstain-icon + .abstain-icon {
+    margin-left: clamp(-6px, -0.4vw, -4px);
 }
 
 .abstain-icon {
