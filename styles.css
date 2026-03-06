@@ -406,6 +406,7 @@ body {
 #matchup-voting-screen .answer-card {
     flex: 1;
     width: auto;
+    min-width: 0;
 }
 
 .prompt-text {
