@@ -384,12 +384,27 @@ body {
 
 .prompt-card {
     background: var(--halfwit-pink);
-    border: 3px solid var(--halfwit-pink);
+    border: 5px solid var(--halfwit-pink);
     border-radius: 16px;
     padding: clamp(16px, 2.2vw, 28px) clamp(24px, 4vw, 50px);
     margin-bottom: clamp(16px, 2.2vw, 28px);
     max-width: clamp(600px, 70vw, 900px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Wider prompt + aligned answer cards on voting screen */
+#matchup-voting-screen .prompt-card {
+    width: clamp(690px, 80.5vw, 1035px);
+    max-width: none;
+}
+
+#matchup-voting-screen .answers-container {
+    width: clamp(690px, 80.5vw, 1035px);
+}
+
+#matchup-voting-screen .answer-card {
+    flex: 1;
+    width: auto;
 }
 
 .prompt-text {
@@ -1281,6 +1296,6 @@ body {
 @media (min-width: 1920px) {
     .logo { font-size: 96px; }
     .prompt-text { font-size: 40px; }
-    .answer-card { width: 500px; padding: 40px 50px; }
+    .answer-card { padding: 40px 50px; }
     .answer-card .answer-text { font-size: 34px; }
 }
