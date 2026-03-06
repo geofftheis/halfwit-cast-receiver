@@ -865,9 +865,9 @@ function startTutorial(data) {
     var remainder = answerTimeSeconds % 60;
     let timeLabel;
     if (remainder === 0) {
-        timeLabel = minutes + ' Minute' + (minutes !== 1 ? 's' : '');
+        timeLabel = minutes + ' Minute';
     } else {
-        timeLabel = minutes + '.' + Math.floor(remainder / 6) + ' Minutes';
+        timeLabel = minutes + '.' + Math.floor(remainder / 6) + ' Minute';
     }
 
     // Reset all tutorial step elements
