@@ -187,7 +187,7 @@ body {
     font-size: clamp(14px, 1.6vw, 20px);
     color: var(--halfwit-white);
     opacity: 0.7;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
 }
 
 #lobby-screen .separator {
@@ -199,7 +199,7 @@ body {
     font-size: clamp(14px, 1.6vw, 20px);
     color: var(--halfwit-white);
     opacity: 0.7;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
 }
 
 #lobby-screen .waiting-message {
