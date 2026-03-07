@@ -1008,7 +1008,8 @@ body {
 }
 
 .tutorial-step5-heading {
-    margin-bottom: clamp(20px, 3vw, 40px);
+    margin-bottom: clamp(16px, 2.2vw, 28px);
+    font-size: clamp(24px, 3vw, 36px);
 }
 
 .tutorial-ready-title {
@@ -1185,7 +1186,7 @@ body {
     background: var(--halfwit-card-bg);
     border-radius: 16px;
     padding: clamp(24px, 3vw, 40px) clamp(30px, 4vw, 50px);
-    width: clamp(280px, 32vw, 400px);
+    width: clamp(340px, 38vw, 480px);
     min-height: clamp(100px, 12vw, 160px);
     display: flex;
     align-items: center;
@@ -1231,7 +1232,7 @@ body {
 }
 
 .tutorial-response-text {
-    font-size: clamp(20px, 2.2vw, 28px);
+    font-size: clamp(22px, 2.5vw, 32px);
     color: var(--halfwit-dark);
     text-align: center;
     font-weight: 500;
