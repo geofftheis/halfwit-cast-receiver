@@ -515,6 +515,7 @@ function updateRoundResultsScreen(data) {
             roundRank = index + 1;
         }
         player.displayRank = roundRank;
+        player.rank = roundRank; // Override host-sent total rank so initial display shows round ranking
     });
 
     // Sort by total score, then round score, then alphabetical for final rankings
