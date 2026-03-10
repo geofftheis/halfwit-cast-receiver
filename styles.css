@@ -1240,7 +1240,7 @@ body {
 
 /* Step 6: fixed-height container for +1 animations (reserves space after fade-out) */
 .tutorial-plus-one-container {
-    height: clamp(80px, 10vw, 120px);
+    height: clamp(50px, 6vh, 90px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1248,7 +1248,7 @@ body {
 
 /* Step 6: +1 float animation */
 .tutorial-plus-one {
-    font-size: clamp(64px, 7.5vw, 96px);
+    font-size: clamp(40px, 5vh, 72px);
     font-weight: 900;
     color: var(--halfwit-white);
     opacity: 0;
