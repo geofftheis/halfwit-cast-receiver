@@ -844,6 +844,16 @@ body {
     font-size: clamp(11px, 1.2vw, 15px);
 }
 
+/* Staggered reveal animation for game results */
+.reveal {
+    opacity: 0;
+    transition: opacity 1s ease-in;
+}
+
+.reveal.visible {
+    opacity: 1;
+}
+
 /* Game Results Screen */
 
 .game-results-container {

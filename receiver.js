@@ -710,10 +710,27 @@ function updateGameResultsScreen(data) {
         if (player.rank === topRank) badge = 'winner';
         else if (player.rank === bottomRank) badge = 'halfwit';
 
-        leaderboard.appendChild(createGameResultEntry(player, badge));
+        const entry = createGameResultEntry(player, badge);
+        entry.classList.add('reveal');
+        entry.setAttribute('data-rank', player.rank);
+        leaderboard.appendChild(entry);
     });
 
     setTwoColumnHeight(leaderboard, data.players.length);
+
+    // Staggered reveal: fade in rank groups one at a time
+    const distinctRanks = [...new Set(data.players.map(p => p.rank))].sort((a, b) => a - b);
+    let delay = 2000; // Initial delay before first reveal
+    distinctRanks.forEach((rank, index) => {
+        setTimeout(() => {
+            leaderboard.querySelectorAll(`.reveal[data-rank="${rank}"]`).forEach(el => {
+                el.classList.add('visible');
+            });
+        }, delay);
+        if (index < distinctRanks.length - 1) {
+            delay += 1500; // Gap between rank groups
+        }
+    });
 }
 
 /**
