@@ -307,7 +307,7 @@ function handleMessage(message) {
                 break;
 
             case 'music_start':
-                startLobbyMusic();
+                startLobbyMusic(data.fadeInDurationMs || 2000);
                 break;
 
             case 'music_fade_stop':
@@ -1167,21 +1167,47 @@ function startTutorial(data) {
 // ── Lobby/Results Background Music ──────────────────────────────────
 
 let musicFadeInterval = null;
+let musicFadeInInterval = null;
 
-function startLobbyMusic() {
+function startLobbyMusic(fadeInDurationMs) {
     const audio = document.getElementById('lobby-music');
     if (!audio) return;
 
-    // Clear any ongoing fade
+    // Clear any ongoing fades
     if (musicFadeInterval) {
         clearInterval(musicFadeInterval);
         musicFadeInterval = null;
     }
+    if (musicFadeInInterval) {
+        clearInterval(musicFadeInInterval);
+        musicFadeInInterval = null;
+    }
 
     audio.currentTime = 0;
-    audio.volume = 1.0;
+    audio.volume = 0;
     audio.play().then(() => {
-        console.log('Lobby music started');
+        console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
+
+        // Fade in
+        if (fadeInDurationMs && fadeInDurationMs > 0) {
+            var steps = 30;
+            var stepDelay = fadeInDurationMs / steps;
+            var volumeStep = 1.0 / steps;
+            var currentStep = 0;
+
+            musicFadeInInterval = setInterval(function() {
+                currentStep++;
+                var newVolume = Math.min(1.0, audio.volume + volumeStep);
+                audio.volume = newVolume;
+                if (currentStep >= steps || newVolume >= 1.0) {
+                    clearInterval(musicFadeInInterval);
+                    musicFadeInInterval = null;
+                    audio.volume = 1.0;
+                }
+            }, stepDelay);
+        } else {
+            audio.volume = 1.0;
+        }
     }).catch(e => {
         console.warn('Lobby music play failed:', e.message);
     });
@@ -1191,7 +1217,13 @@ function fadeStopLobbyMusic(fadeDurationMs) {
     const audio = document.getElementById('lobby-music');
     if (!audio || audio.paused) return;
 
-    // Clear any previous fade
+    // Clear any in-progress fade-in
+    if (musicFadeInInterval) {
+        clearInterval(musicFadeInInterval);
+        musicFadeInInterval = null;
+    }
+
+    // Clear any previous fade-out
     if (musicFadeInterval) {
         clearInterval(musicFadeInterval);
     }
@@ -1223,7 +1255,11 @@ function stopLobbyMusic() {
     const audio = document.getElementById('lobby-music');
     if (!audio) return;
 
-    // Clear any ongoing fade
+    // Clear any ongoing fades
+    if (musicFadeInInterval) {
+        clearInterval(musicFadeInInterval);
+        musicFadeInInterval = null;
+    }
     if (musicFadeInterval) {
         clearInterval(musicFadeInterval);
         musicFadeInterval = null;
