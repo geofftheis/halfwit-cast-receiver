@@ -306,6 +306,18 @@ function handleMessage(message) {
                 showScreen('end');
                 break;
 
+            case 'music_start':
+                startLobbyMusic();
+                break;
+
+            case 'music_fade_stop':
+                fadeStopLobbyMusic(data.fadeDurationMs || 3000);
+                break;
+
+            case 'music_stop':
+                stopLobbyMusic();
+                break;
+
             default:
                 console.warn('Unknown message type:', data.type);
         }
@@ -1150,6 +1162,77 @@ function startTutorial(data) {
     }, t);
 
     console.log('Tutorial started, total duration: ' + t + 'ms');
+}
+
+// ── Lobby/Results Background Music ──────────────────────────────────
+
+let musicFadeInterval = null;
+
+function startLobbyMusic() {
+    const audio = document.getElementById('lobby-music');
+    if (!audio) return;
+
+    // Clear any ongoing fade
+    if (musicFadeInterval) {
+        clearInterval(musicFadeInterval);
+        musicFadeInterval = null;
+    }
+
+    audio.currentTime = 0;
+    audio.volume = 1.0;
+    audio.play().then(() => {
+        console.log('Lobby music started');
+    }).catch(e => {
+        console.warn('Lobby music play failed:', e.message);
+    });
+}
+
+function fadeStopLobbyMusic(fadeDurationMs) {
+    const audio = document.getElementById('lobby-music');
+    if (!audio || audio.paused) return;
+
+    // Clear any previous fade
+    if (musicFadeInterval) {
+        clearInterval(musicFadeInterval);
+    }
+
+    const steps = 30;
+    const stepDelay = fadeDurationMs / steps;
+    const volumeStep = audio.volume / steps;
+    let currentStep = 0;
+
+    console.log('Lobby music fading out over ' + fadeDurationMs + 'ms');
+
+    musicFadeInterval = setInterval(() => {
+        currentStep++;
+        const newVolume = Math.max(0, audio.volume - volumeStep);
+        audio.volume = newVolume;
+
+        if (currentStep >= steps || newVolume <= 0) {
+            clearInterval(musicFadeInterval);
+            musicFadeInterval = null;
+            audio.pause();
+            audio.currentTime = 0;
+            audio.volume = 1.0;
+            console.log('Lobby music fade complete, stopped');
+        }
+    }, stepDelay);
+}
+
+function stopLobbyMusic() {
+    const audio = document.getElementById('lobby-music');
+    if (!audio) return;
+
+    // Clear any ongoing fade
+    if (musicFadeInterval) {
+        clearInterval(musicFadeInterval);
+        musicFadeInterval = null;
+    }
+
+    audio.pause();
+    audio.currentTime = 0;
+    audio.volume = 1.0;
+    console.log('Lobby music stopped immediately');
 }
 
 /**
