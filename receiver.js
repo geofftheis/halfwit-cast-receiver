@@ -311,7 +311,7 @@ function handleMessage(message) {
                 break;
 
             case 'music_fade_stop':
-                fadeStopLobbyMusic(data.fadeDurationMs || 3000);
+                fadeStopLobbyMusic(data.fadeDurationMs || 2000);
                 break;
 
             case 'music_stop':
