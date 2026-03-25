@@ -330,6 +330,10 @@ function handleMessage(message) {
                 playSfx('sfx-bell');
                 break;
 
+            case 'play_vote_tick':
+                playSfx('sfx-tick', 1.5);
+                break;
+
             default:
                 console.warn('Unknown message type:', data.type);
         }
@@ -1266,11 +1270,13 @@ function fadeStopLobbyMusic(fadeDurationMs) {
 /**
  * Play a short sound effect by element ID.
  * Resets currentTime so rapid calls don't overlap stale playback.
+ * Optional rate parameter adjusts playback speed/pitch (default 1.0).
  */
-function playSfx(elementId) {
+function playSfx(elementId, rate) {
     const audio = document.getElementById(elementId);
     if (!audio) return;
     audio.currentTime = 0;
+    audio.playbackRate = rate || 1.0;
     audio.play().catch(e => {
         console.warn('SFX play failed (' + elementId + '):', e.message);
     });
