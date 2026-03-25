@@ -318,6 +318,18 @@ function handleMessage(message) {
                 stopLobbyMusic();
                 break;
 
+            case 'play_tick':
+                playSfx('sfx-tick');
+                break;
+
+            case 'play_tock':
+                playSfx('sfx-tock');
+                break;
+
+            case 'play_bell':
+                playSfx('sfx-bell');
+                break;
+
             default:
                 console.warn('Unknown message type:', data.type);
         }
@@ -1249,6 +1261,19 @@ function fadeStopLobbyMusic(fadeDurationMs) {
             console.log('Lobby music fade complete, stopped');
         }
     }, stepDelay);
+}
+
+/**
+ * Play a short sound effect by element ID.
+ * Resets currentTime so rapid calls don't overlap stale playback.
+ */
+function playSfx(elementId) {
+    const audio = document.getElementById(elementId);
+    if (!audio) return;
+    audio.currentTime = 0;
+    audio.play().catch(e => {
+        console.warn('SFX play failed (' + elementId + '):', e.message);
+    });
 }
 
 function stopLobbyMusic() {
