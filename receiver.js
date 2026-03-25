@@ -331,7 +331,7 @@ function handleMessage(message) {
                 break;
 
             case 'play_vote_tick':
-                playSfx('sfx-tick', 1.7);
+                playSfx('sfx-tick', 1.8);
                 break;
 
             default:
