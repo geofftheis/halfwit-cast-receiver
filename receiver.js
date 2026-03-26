@@ -565,7 +565,7 @@ function updateRoundResultsScreen(data) {
     // Create a map of player name to their final position index in the sorted-by-total array
     const finalPositions = new Map();
     sortedByTotal.forEach((player, index) => {
-        finalPositions.set(player.name, index);
+        finalPositions.set(player.iconId, index);
     });
 
     // Initially show players sorted by round score
@@ -573,7 +573,7 @@ function updateRoundResultsScreen(data) {
         const entry = createLeaderboardEntry(player, true, false);
 
         // Find this player's final position
-        const finalIndex = finalPositions.get(player.name);
+        const finalIndex = finalPositions.get(player.iconId);
         const finalRank = sortedByTotal[finalIndex].finalRank;
 
         // Store animation data
