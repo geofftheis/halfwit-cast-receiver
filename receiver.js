@@ -304,6 +304,10 @@ function handleMessage(message) {
 
             case 'end':
                 showScreen('end');
+                // Safety net: stop music after 2 seconds in case music_fade_stop
+                // was missed or arrived out of order. If the fade already finished,
+                // stopLobbyMusic() is a no-op (audio already paused).
+                setTimeout(() => stopLobbyMusic(), 2000);
                 break;
 
             case 'music_start':
@@ -1337,9 +1341,10 @@ function initReceiver() {
     // Handle sender disconnected
     context.addEventListener(cast.framework.system.EventType.SENDER_DISCONNECTED, (event) => {
         console.log('Sender disconnected:', event);
-        // If no more senders, show end screen
+        // If no more senders, show end screen and stop any playing music
         if (context.getSenders().length === 0) {
             showScreen('end');
+            setTimeout(() => stopLobbyMusic(), 2000);
         }
     });
 
