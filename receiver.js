@@ -353,7 +353,6 @@ function updateLobbyScreen(data) {
     const screen = screens.lobby;
 
     screen.querySelector('.game-name').textContent = data.gameName;
-    screen.querySelector('.host-name').textContent = data.hostName;
     screen.querySelector('.player-count').textContent = data.players.length + '/' + data.maxPlayers + ' players';
     screen.querySelector('.round-count').textContent = data.totalRounds + ' rounds';
 
