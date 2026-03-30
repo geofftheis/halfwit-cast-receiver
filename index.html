@@ -17,7 +17,6 @@
         <div id="connecting-screen" class="screen active">
             <img src="halfwit_logo.png" alt="Half-Wit" class="logo-image connecting-logo">
             <div class="status">Connecting...</div>
-            <div id="audio-debug" style="position:fixed;bottom:10px;left:10px;color:#0f0;font-size:14px;font-family:monospace;text-align:left;opacity:0.8;z-index:9999;"></div>
         </div>
 
         <!-- Lobby screen -->
@@ -277,6 +276,9 @@
             <div class="status">Thanks for playing!</div>
         </div>
     </div>
+
+    <!-- Temporary audio debug overlay (persists across all screens) -->
+    <div id="audio-debug" style="position:fixed;bottom:10px;left:10px;color:#0f0;font-size:14px;font-family:monospace;text-align:left;opacity:0.8;z-index:9999;background:rgba(0,0,0,0.7);padding:8px;max-width:90%;"></div>
 
     <script src="receiver.js?v=3"></script>
 </body>
