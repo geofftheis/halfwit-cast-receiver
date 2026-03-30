@@ -311,6 +311,7 @@ function handleMessage(message) {
                 break;
 
             case 'music_start':
+                updateAudioDebug('MSG: music_start received');
                 startLobbyMusic(data.fadeInDurationMs || 2000);
                 break;
 
@@ -1193,39 +1194,68 @@ const audioBuffers = {};  // keyed by name: 'lobby_music', 'tick', 'tock', 'bell
 let audioLoaded = false;
 
 /**
+ * Update the on-screen audio debug overlay (temporary diagnostic).
+ */
+function updateAudioDebug(msg) {
+    var el = document.getElementById('audio-debug');
+    if (el) {
+        el.innerHTML += msg + '<br>';
+        // Keep only last 8 lines
+        var lines = el.innerHTML.split('<br>');
+        if (lines.length > 9) {
+            el.innerHTML = lines.slice(lines.length - 9).join('<br>');
+        }
+    }
+    console.log('[AUDIO-DEBUG] ' + msg);
+}
+
+/**
  * Initialize the Web Audio API context and pre-fetch all audio files.
  * Call once during receiver init.
  */
 function initAudio() {
     try {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        console.log('AudioContext created, state: ' + audioCtx.state);
+        updateAudioDebug('AudioContext created, state: ' + audioCtx.state);
     } catch (e) {
-        console.error('Failed to create AudioContext:', e.message);
+        updateAudioDebug('AudioContext FAILED: ' + e.message);
         return;
     }
 
-    const files = {
+    var files = {
         lobby_music: 'lobby_music.m4a?v=3',
         tick: 'tick.m4a?v=3',
         tock: 'tock.m4a?v=3',
         bell: 'bell_ding.m4a?v=3'
     };
 
-    const loadPromises = Object.entries(files).map(([name, url]) =>
-        fetch(url)
-            .then(r => r.arrayBuffer())
-            .then(buf => audioCtx.decodeAudioData(buf))
-            .then(decoded => {
-                audioBuffers[name] = decoded;
-                console.log('Audio loaded: ' + name + ' (' + decoded.duration.toFixed(1) + 's)');
+    var loadPromises = Object.entries(files).map(function(entry) {
+        var name = entry[0];
+        var url = entry[1];
+        return fetch(url)
+            .then(function(r) {
+                if (!r.ok) {
+                    throw new Error('HTTP ' + r.status);
+                }
+                updateAudioDebug('Fetched ' + name + ' (' + r.status + ')');
+                return r.arrayBuffer();
             })
-            .catch(e => console.error('Failed to load audio ' + name + ':', e.message))
-    );
+            .then(function(buf) {
+                updateAudioDebug('Decoding ' + name + ' (' + buf.byteLength + ' bytes)');
+                return audioCtx.decodeAudioData(buf);
+            })
+            .then(function(decoded) {
+                audioBuffers[name] = decoded;
+                updateAudioDebug('Decoded ' + name + ' (' + decoded.duration.toFixed(1) + 's)');
+            })
+            .catch(function(e) {
+                updateAudioDebug('FAILED ' + name + ': ' + e.message);
+            });
+    });
 
-    Promise.all(loadPromises).then(() => {
+    Promise.all(loadPromises).then(function() {
         audioLoaded = true;
-        console.log('All audio files loaded');
+        updateAudioDebug('All audio ready. Buffers: ' + Object.keys(audioBuffers).join(', '));
     });
 }
 
@@ -1234,11 +1264,16 @@ function initAudio() {
  * Call from framework event handlers to unlock audio.
  */
 function resumeAudioContext() {
-    if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume().then(() => {
-            console.log('AudioContext resumed successfully');
-        }).catch(e => {
-            console.warn('AudioContext resume failed:', e.message);
+    if (!audioCtx) {
+        updateAudioDebug('resumeAudioContext: no audioCtx');
+        return;
+    }
+    updateAudioDebug('resumeAudioContext: state=' + audioCtx.state);
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume().then(function() {
+            updateAudioDebug('AudioContext resumed -> ' + audioCtx.state);
+        }).catch(function(e) {
+            updateAudioDebug('AudioContext resume FAILED: ' + e.message);
         });
     }
 }
@@ -1251,8 +1286,9 @@ let musicFadeInterval = null;
 let musicFadeInInterval = null;
 
 function startLobbyMusic(fadeInDurationMs) {
+    updateAudioDebug('startLobbyMusic called, ctx=' + (audioCtx ? audioCtx.state : 'null') + ', buffer=' + !!audioBuffers.lobby_music);
     if (!audioCtx || !audioBuffers.lobby_music) {
-        console.warn('startLobbyMusic: audio not ready');
+        updateAudioDebug('startLobbyMusic: NOT READY');
         return;
     }
 
