@@ -1184,39 +1184,74 @@ function startTutorial(data) {
     console.log('Tutorial started, total duration: ' + t + 'ms');
 }
 
-// ── Lobby/Results Background Music ──────────────────────────────────
+// ── Audio System ────────────────────────────────────────────────────
+//
+// HTML5 <audio> elements handle decoding (good quality). An AudioContext
+// with MediaElementAudioSourceNodes routes their output through the
+// Web Audio API graph, which has autoplay permission on Chromecast.
+// This gives us both high-quality decoding and reliable playback.
 
-let musicFadeInterval = null;
-let musicFadeInInterval = null;
+var audioCtx = null;
+var musicGainNode = null;       // GainNode for lobby music fade control
+var musicSourceNode = null;     // MediaElementAudioSourceNode for lobby music
+var sfxSourceNodes = {};        // MediaElementAudioSourceNodes for SFX elements
 var pendingMusicFadeIn = null;  // queued fadeInDurationMs if music_start arrives before audio ready
 var lobbyMusicReady = false;
 
+let musicFadeInterval = null;
+let musicFadeInInterval = null;
+
 /**
- * Wait for the lobby-music audio element to be ready for playback.
- * Sets lobbyMusicReady=true and plays any deferred music_start.
+ * Initialize AudioContext and connect all <audio> elements through it.
+ * Call once during receiver init.
  */
 function initAudio() {
-    var audio = document.getElementById('lobby-music');
-    if (!audio) return;
-
-    // Check if already loaded enough to play
-    if (audio.readyState >= 3) {
-        lobbyMusicReady = true;
-        console.log('Lobby music already ready');
-        return;
+    // Create AudioContext
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        console.log('AudioContext created, state: ' + audioCtx.state);
+    } catch (e) {
+        console.error('Failed to create AudioContext:', e.message);
     }
 
-    audio.addEventListener('canplaythrough', function() {
-        lobbyMusicReady = true;
-        console.log('Lobby music ready (canplaythrough)');
+    // Connect lobby music through AudioContext with a GainNode for fading
+    var lobbyAudio = document.getElementById('lobby-music');
+    if (lobbyAudio && audioCtx) {
+        musicGainNode = audioCtx.createGain();
+        musicGainNode.connect(audioCtx.destination);
+        musicSourceNode = audioCtx.createMediaElementSource(lobbyAudio);
+        musicSourceNode.connect(musicGainNode);
+    }
 
-        // If music_start arrived before audio was ready, play now
-        if (pendingMusicFadeIn !== null) {
-            console.log('Playing deferred music_start');
-            startLobbyMusic(pendingMusicFadeIn);
-            pendingMusicFadeIn = null;
+    // Connect SFX elements through AudioContext
+    var sfxIds = ['sfx-tick', 'sfx-tock', 'sfx-bell'];
+    for (var i = 0; i < sfxIds.length; i++) {
+        var el = document.getElementById(sfxIds[i]);
+        if (el && audioCtx) {
+            var src = audioCtx.createMediaElementSource(el);
+            src.connect(audioCtx.destination);
+            sfxSourceNodes[sfxIds[i]] = src;
         }
-    });
+    }
+
+    // Track when lobby music is ready to play
+    if (lobbyAudio) {
+        if (lobbyAudio.readyState >= 3) {
+            lobbyMusicReady = true;
+            console.log('Lobby music already ready');
+        } else {
+            lobbyAudio.addEventListener('canplaythrough', function() {
+                lobbyMusicReady = true;
+                console.log('Lobby music ready (canplaythrough)');
+
+                if (pendingMusicFadeIn !== null) {
+                    console.log('Playing deferred music_start');
+                    startLobbyMusic(pendingMusicFadeIn);
+                    pendingMusicFadeIn = null;
+                }
+            });
+        }
+    }
 }
 
 function startLobbyMusic(fadeInDurationMs) {
@@ -1227,6 +1262,11 @@ function startLobbyMusic(fadeInDurationMs) {
         console.log('startLobbyMusic: audio not ready, queueing');
         pendingMusicFadeIn = fadeInDurationMs;
         return;
+    }
+
+    // Resume AudioContext if suspended
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
     }
 
     // Clear any ongoing fades
@@ -1240,11 +1280,17 @@ function startLobbyMusic(fadeInDurationMs) {
     }
 
     audio.currentTime = 0;
-    audio.volume = 0;
+    // Volume control goes through the GainNode when routed via AudioContext
+    if (musicGainNode) {
+        audio.volume = 1;  // keep element volume at max
+        musicGainNode.gain.value = 0;  // fade via gain node
+    } else {
+        audio.volume = 0;
+    }
+
     audio.play().then(function() {
         console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
 
-        // Fade in
         if (fadeInDurationMs && fadeInDurationMs > 0) {
             var steps = 30;
             var stepDelay = fadeInDurationMs / steps;
@@ -1253,16 +1299,28 @@ function startLobbyMusic(fadeInDurationMs) {
 
             musicFadeInInterval = setInterval(function() {
                 currentStep++;
-                var newVolume = Math.min(1.0, audio.volume + volumeStep);
-                audio.volume = newVolume;
-                if (currentStep >= steps || newVolume >= 1.0) {
+                var newVolume = Math.min(1.0, currentStep * volumeStep);
+                if (musicGainNode) {
+                    musicGainNode.gain.value = newVolume;
+                } else {
+                    audio.volume = newVolume;
+                }
+                if (currentStep >= steps) {
                     clearInterval(musicFadeInInterval);
                     musicFadeInInterval = null;
-                    audio.volume = 1.0;
+                    if (musicGainNode) {
+                        musicGainNode.gain.value = 1.0;
+                    } else {
+                        audio.volume = 1.0;
+                    }
                 }
             }, stepDelay);
         } else {
-            audio.volume = 1.0;
+            if (musicGainNode) {
+                musicGainNode.gain.value = 1.0;
+            } else {
+                audio.volume = 1.0;
+            }
         }
     }).catch(function(e) {
         console.warn('Lobby music play failed:', e.message);
@@ -1286,21 +1344,29 @@ function fadeStopLobbyMusic(fadeDurationMs) {
 
     var steps = 30;
     var stepDelay = fadeDurationMs / steps;
-    var volumeStep = audio.volume / steps;
+    var startVolume = musicGainNode ? musicGainNode.gain.value : audio.volume;
+    var volumeStep = startVolume / steps;
     var currentStep = 0;
 
     console.log('Lobby music fading out over ' + fadeDurationMs + 'ms');
 
     musicFadeInterval = setInterval(function() {
         currentStep++;
-        var newVolume = Math.max(0, audio.volume - volumeStep);
-        audio.volume = newVolume;
+        var newVolume = Math.max(0, startVolume - currentStep * volumeStep);
+        if (musicGainNode) {
+            musicGainNode.gain.value = newVolume;
+        } else {
+            audio.volume = newVolume;
+        }
 
         if (currentStep >= steps || newVolume <= 0) {
             clearInterval(musicFadeInterval);
             musicFadeInterval = null;
             audio.pause();
             audio.currentTime = 0;
+            if (musicGainNode) {
+                musicGainNode.gain.value = 1.0;
+            }
             audio.volume = 1.0;
             console.log('Lobby music fade complete, stopped');
         }
@@ -1315,6 +1381,12 @@ function fadeStopLobbyMusic(fadeDurationMs) {
 function playSfx(elementId, rate) {
     var audio = document.getElementById(elementId);
     if (!audio) return;
+
+    // Resume AudioContext if suspended
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+
     audio.currentTime = 0;
     audio.playbackRate = rate || 1.0;
     audio.play().catch(function(e) {
@@ -1341,6 +1413,9 @@ function stopLobbyMusic() {
 
     audio.pause();
     audio.currentTime = 0;
+    if (musicGainNode) {
+        musicGainNode.gain.value = 1.0;
+    }
     audio.volume = 1.0;
     console.log('Lobby music stopped immediately');
 }
