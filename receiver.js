@@ -1323,6 +1323,11 @@ function playSfx(name, rate) {
         return;
     }
 
+    // Pause current audio first so Chromecast can cleanly swap src
+    if (!audio.paused) {
+        audio.pause();
+    }
+
     // Reuse the single audio element — swap src and play
     audio.loop = false;
     audio.src = blobUrl;
