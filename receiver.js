@@ -1277,16 +1277,12 @@ function fadeStopLobbyMusic(fadeDurationMs) {
 // blobs and play them through a single dynamically-created <audio> element.
 
 var sfxBlobUrls = {};
-var sfxAudio = null;
 var sfxInitStarted = false;
 
 function initSfx() {
     if (sfxInitStarted) return;
     sfxInitStarted = true;
     console.log('SFX: loading sound effects...');
-
-    // Create a single shared audio element for SFX (not added to DOM with preload)
-    sfxAudio = document.createElement('audio');
 
     // Load sequentially to avoid network contention that causes lobby music stutter
     var files = [['tick', 'tick.m4a'], ['tock', 'tock.m4a'], ['bell', 'bell_ding.m4a']];
@@ -1315,14 +1311,16 @@ function playSfx(elementId, rate) {
     var nameMap = { 'sfx-tick': 'tick', 'sfx-tock': 'tock', 'sfx-bell': 'bell' };
     var name = nameMap[elementId] || elementId;
     var blobUrl = sfxBlobUrls[name];
-    if (!sfxAudio || !blobUrl) {
-        console.warn('SFX not ready: ' + name + ' audio=' + !!sfxAudio + ' blob=' + !!blobUrl);
+    var audio = document.getElementById('sfx-player');
+    if (!audio || !blobUrl) {
+        console.warn('SFX not ready: ' + name + ' audio=' + !!audio + ' blob=' + !!blobUrl);
         return;
     }
 
-    // Create a fresh element each time to allow overlapping sounds
-    var audio = new Audio(blobUrl);
-    if (rate && rate !== 1.0) audio.playbackRate = rate;
+    // Reuse the single DOM element — swap src and play
+    audio.src = blobUrl;
+    audio.playbackRate = rate || 1.0;
+    audio.load();
     audio.play().then(function() {
         console.log('SFX played: ' + name);
     }).catch(function(e) {

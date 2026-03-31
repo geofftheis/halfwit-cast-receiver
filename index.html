@@ -277,6 +277,9 @@
     <!-- Lobby/results background music (controlled by sender via custom messages) -->
     <audio id="lobby-music" src="lobby_music.m4a" preload="auto" loop></audio>
 
+    <!-- Single shared SFX element (preload="none" to avoid interfering with lobby music) -->
+    <audio id="sfx-player" preload="none"></audio>
+
     <script src="receiver.js"></script>
 </body>
 </html>
