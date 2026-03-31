@@ -311,7 +311,7 @@ function handleMessage(message) {
                 break;
 
             case 'music_start':
-                updateAudioDebug('MSG: music_start received');
+                dbg('MSG: music_start received');
                 startLobbyMusic(data.fadeInDurationMs || 2000);
                 break;
 
@@ -1201,6 +1201,16 @@ var lobbyMusicReady = false;
 let musicFadeInterval = null;
 let musicFadeInInterval = null;
 
+function dbg(msg) {
+    var el = document.getElementById('audio-debug');
+    if (el) {
+        el.innerHTML += msg + '<br>';
+        var lines = el.innerHTML.split('<br>');
+        if (lines.length > 12) el.innerHTML = lines.slice(lines.length - 12).join('<br>');
+    }
+    console.log('[DBG] ' + msg);
+}
+
 /**
  * Initialize AudioContext and connect all <audio> elements through it.
  * Call once during receiver init.
@@ -1209,18 +1219,20 @@ function initAudio() {
     // Create AudioContext
     try {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        console.log('AudioContext created, state: ' + audioCtx.state);
+        dbg('AudioCtx: ' + audioCtx.state + ', sampleRate=' + audioCtx.sampleRate);
     } catch (e) {
         console.error('Failed to create AudioContext:', e.message);
     }
 
     // Connect lobby music through AudioContext with a GainNode for fading
     var lobbyAudio = document.getElementById('lobby-music');
+    dbg('lobbyAudio element: ' + (lobbyAudio ? 'found' : 'MISSING'));
     if (lobbyAudio && audioCtx) {
         musicGainNode = audioCtx.createGain();
         musicGainNode.connect(audioCtx.destination);
         musicSourceNode = audioCtx.createMediaElementSource(lobbyAudio);
         musicSourceNode.connect(musicGainNode);
+        dbg('Lobby music routed through AudioCtx');
     }
 
     // Connect SFX elements through AudioContext
@@ -1233,6 +1245,7 @@ function initAudio() {
             sfxSourceNodes[sfxIds[i]] = src;
         }
     }
+    dbg('SFX routed: ' + Object.keys(sfxSourceNodes).join(', '));
 
     // Track when lobby music is ready to play
     if (lobbyAudio) {
@@ -1245,7 +1258,7 @@ function initAudio() {
                 console.log('Lobby music ready (canplaythrough)');
 
                 if (pendingMusicFadeIn !== null) {
-                    console.log('Playing deferred music_start');
+                    dbg('Playing deferred music_start');
                     startLobbyMusic(pendingMusicFadeIn);
                     pendingMusicFadeIn = null;
                 }
@@ -1258,8 +1271,10 @@ function startLobbyMusic(fadeInDurationMs) {
     var audio = document.getElementById('lobby-music');
     if (!audio) return;
 
+    dbg('startLobbyMusic: ready=' + lobbyMusicReady + ', ctx=' + (audioCtx ? audioCtx.state : 'null') + ', gain=' + !!musicGainNode);
+
     if (!lobbyMusicReady) {
-        console.log('startLobbyMusic: audio not ready, queueing');
+        dbg('startLobbyMusic: queueing');
         pendingMusicFadeIn = fadeInDurationMs;
         return;
     }
@@ -1267,6 +1282,7 @@ function startLobbyMusic(fadeInDurationMs) {
     // Resume AudioContext if suspended
     if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
+        dbg('Resumed AudioCtx');
     }
 
     // Clear any ongoing fades
@@ -1289,7 +1305,7 @@ function startLobbyMusic(fadeInDurationMs) {
     }
 
     audio.play().then(function() {
-        console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
+        dbg('play() OK, fading in ' + fadeInDurationMs + 'ms');
 
         if (fadeInDurationMs && fadeInDurationMs > 0) {
             var steps = 30;
@@ -1323,7 +1339,7 @@ function startLobbyMusic(fadeInDurationMs) {
             }
         }
     }).catch(function(e) {
-        console.warn('Lobby music play failed:', e.message);
+        dbg('play() FAILED: ' + e.message);
     });
 }
 
