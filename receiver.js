@@ -324,19 +324,19 @@ function handleMessage(message) {
                 break;
 
             case 'play_tick':
-                playSfx('tick');
+                playSfx('sfx-tick');
                 break;
 
             case 'play_tock':
-                playSfx('tock');
+                playSfx('sfx-tock');
                 break;
 
             case 'play_bell':
-                playSfx('bell');
+                playSfx('sfx-bell');
                 break;
 
             case 'play_vote_tick':
-                playSfx('tick', 1.8);
+                playSfx('sfx-tick', 1.8);
                 break;
 
             default:
@@ -1184,173 +1184,94 @@ function startTutorial(data) {
     console.log('Tutorial started, total duration: ' + t + 'ms');
 }
 
-// ── Web Audio API Sound System ──────────────────────────────────────
-//
-// Uses the Web Audio API instead of HTML5 <audio> elements to avoid
-// Chromecast autoplay policy blocking audio.play() on unmanaged media.
+// ── Lobby/Results Background Music ──────────────────────────────────
 
-let audioCtx = null;
-const audioBuffers = {};  // keyed by name: 'lobby_music', 'tick', 'tock', 'bell'
-let audioLoaded = false;
-var pendingMusicFadeIn = null;  // queued fadeInDurationMs if music_start arrives before buffer ready
+let musicFadeInterval = null;
+let musicFadeInInterval = null;
+var pendingMusicFadeIn = null;  // queued fadeInDurationMs if music_start arrives before audio ready
+var lobbyMusicReady = false;
 
 /**
- * Update the on-screen audio debug overlay (temporary diagnostic).
- */
-function updateAudioDebug(msg) {
-    var el = document.getElementById('audio-debug');
-    if (el) {
-        el.innerHTML += msg + '<br>';
-        // Keep only last 8 lines
-        var lines = el.innerHTML.split('<br>');
-        if (lines.length > 9) {
-            el.innerHTML = lines.slice(lines.length - 9).join('<br>');
-        }
-    }
-    console.log('[AUDIO-DEBUG] ' + msg);
-}
-
-/**
- * Initialize the Web Audio API context and pre-fetch all audio files.
- * Call once during receiver init.
+ * Wait for the lobby-music audio element to be ready for playback.
+ * Sets lobbyMusicReady=true and plays any deferred music_start.
  */
 function initAudio() {
-    try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        updateAudioDebug('AudioContext created, state: ' + audioCtx.state);
-    } catch (e) {
-        updateAudioDebug('AudioContext FAILED: ' + e.message);
+    var audio = document.getElementById('lobby-music');
+    if (!audio) return;
+
+    // Check if already loaded enough to play
+    if (audio.readyState >= 3) {
+        lobbyMusicReady = true;
+        console.log('Lobby music already ready');
         return;
     }
 
-    var files = {
-        lobby_music: 'lobby_music.m4a?v=3',
-        tick: 'tick.m4a?v=3',
-        tock: 'tock.m4a?v=3',
-        bell: 'bell_ding.m4a?v=3'
-    };
+    audio.addEventListener('canplaythrough', function() {
+        lobbyMusicReady = true;
+        console.log('Lobby music ready (canplaythrough)');
 
-    var loadPromises = Object.entries(files).map(function(entry) {
-        var name = entry[0];
-        var url = entry[1];
-        return fetch(url)
-            .then(function(r) {
-                if (!r.ok) {
-                    throw new Error('HTTP ' + r.status);
-                }
-                updateAudioDebug('Fetched ' + name + ' (' + r.status + ')');
-                return r.arrayBuffer();
-            })
-            .then(function(buf) {
-                updateAudioDebug('Decoding ' + name + ' (' + buf.byteLength + ' bytes)');
-                return audioCtx.decodeAudioData(buf);
-            })
-            .then(function(decoded) {
-                audioBuffers[name] = decoded;
-                updateAudioDebug('Decoded ' + name + ' (' + decoded.duration.toFixed(1) + 's)');
-            })
-            .catch(function(e) {
-                updateAudioDebug('FAILED ' + name + ': ' + e.message);
-            });
-    });
-
-    Promise.all(loadPromises).then(function() {
-        audioLoaded = true;
-        updateAudioDebug('All audio ready. Buffers: ' + Object.keys(audioBuffers).join(', '));
-
-        // If music_start arrived before the buffer was ready, play now
+        // If music_start arrived before audio was ready, play now
         if (pendingMusicFadeIn !== null) {
-            updateAudioDebug('Playing deferred music_start');
+            console.log('Playing deferred music_start');
             startLobbyMusic(pendingMusicFadeIn);
             pendingMusicFadeIn = null;
         }
     });
 }
 
-/**
- * Resume the AudioContext if it's suspended (required by autoplay policy).
- * Call from framework event handlers to unlock audio.
- */
-function resumeAudioContext() {
-    if (!audioCtx) {
-        updateAudioDebug('resumeAudioContext: no audioCtx');
-        return;
-    }
-    updateAudioDebug('resumeAudioContext: state=' + audioCtx.state);
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume().then(function() {
-            updateAudioDebug('AudioContext resumed -> ' + audioCtx.state);
-        }).catch(function(e) {
-            updateAudioDebug('AudioContext resume FAILED: ' + e.message);
-        });
-    }
-}
-
-// ── Lobby/Results Background Music ──────────────────────────────────
-
-let musicSourceNode = null;
-let musicGainNode = null;
-let musicFadeInterval = null;
-let musicFadeInInterval = null;
-
 function startLobbyMusic(fadeInDurationMs) {
-    updateAudioDebug('startLobbyMusic called, ctx=' + (audioCtx ? audioCtx.state : 'null') + ', buffer=' + !!audioBuffers.lobby_music);
-    if (!audioCtx) {
-        updateAudioDebug('startLobbyMusic: no AudioContext');
-        return;
-    }
-    if (!audioBuffers.lobby_music) {
-        updateAudioDebug('startLobbyMusic: buffer not ready, queueing');
+    var audio = document.getElementById('lobby-music');
+    if (!audio) return;
+
+    if (!lobbyMusicReady) {
+        console.log('startLobbyMusic: audio not ready, queueing');
         pendingMusicFadeIn = fadeInDurationMs;
         return;
     }
 
-    // Resume context in case it's suspended
-    resumeAudioContext();
+    // Clear any ongoing fades
+    if (musicFadeInterval) {
+        clearInterval(musicFadeInterval);
+        musicFadeInterval = null;
+    }
+    if (musicFadeInInterval) {
+        clearInterval(musicFadeInInterval);
+        musicFadeInInterval = null;
+    }
 
-    // Stop any currently playing music
-    stopLobbyMusic();
+    audio.currentTime = 0;
+    audio.volume = 0;
+    audio.play().then(function() {
+        console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
 
-    // Create gain node for volume control
-    musicGainNode = audioCtx.createGain();
-    musicGainNode.gain.value = 0;
-    musicGainNode.connect(audioCtx.destination);
+        // Fade in
+        if (fadeInDurationMs && fadeInDurationMs > 0) {
+            var steps = 30;
+            var stepDelay = fadeInDurationMs / steps;
+            var volumeStep = 1.0 / steps;
+            var currentStep = 0;
 
-    // Create source node (looping)
-    musicSourceNode = audioCtx.createBufferSource();
-    musicSourceNode.buffer = audioBuffers.lobby_music;
-    musicSourceNode.loop = true;
-    musicSourceNode.connect(musicGainNode);
-    musicSourceNode.start(0);
-
-    console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
-
-    // Fade in
-    if (fadeInDurationMs && fadeInDurationMs > 0) {
-        var steps = 30;
-        var stepDelay = fadeInDurationMs / steps;
-        var volumeStep = 1.0 / steps;
-        var currentStep = 0;
-
-        musicFadeInInterval = setInterval(function() {
-            currentStep++;
-            if (musicGainNode) {
-                var newVolume = Math.min(1.0, musicGainNode.gain.value + volumeStep);
-                musicGainNode.gain.value = newVolume;
+            musicFadeInInterval = setInterval(function() {
+                currentStep++;
+                var newVolume = Math.min(1.0, audio.volume + volumeStep);
+                audio.volume = newVolume;
                 if (currentStep >= steps || newVolume >= 1.0) {
                     clearInterval(musicFadeInInterval);
                     musicFadeInInterval = null;
-                    musicGainNode.gain.value = 1.0;
+                    audio.volume = 1.0;
                 }
-            }
-        }, stepDelay);
-    } else {
-        musicGainNode.gain.value = 1.0;
-    }
+            }, stepDelay);
+        } else {
+            audio.volume = 1.0;
+        }
+    }).catch(function(e) {
+        console.warn('Lobby music play failed:', e.message);
+    });
 }
 
 function fadeStopLobbyMusic(fadeDurationMs) {
-    if (!musicSourceNode || !musicGainNode) return;
+    var audio = document.getElementById('lobby-music');
+    if (!audio || audio.paused) return;
 
     // Clear any in-progress fade-in
     if (musicFadeInInterval) {
@@ -1365,50 +1286,48 @@ function fadeStopLobbyMusic(fadeDurationMs) {
 
     var steps = 30;
     var stepDelay = fadeDurationMs / steps;
-    var startVolume = musicGainNode.gain.value;
-    var volumeStep = startVolume / steps;
+    var volumeStep = audio.volume / steps;
     var currentStep = 0;
 
     console.log('Lobby music fading out over ' + fadeDurationMs + 'ms');
 
     musicFadeInterval = setInterval(function() {
         currentStep++;
-        if (musicGainNode) {
-            var newVolume = Math.max(0, musicGainNode.gain.value - volumeStep);
-            musicGainNode.gain.value = newVolume;
+        var newVolume = Math.max(0, audio.volume - volumeStep);
+        audio.volume = newVolume;
 
-            if (currentStep >= steps || newVolume <= 0) {
-                clearInterval(musicFadeInterval);
-                musicFadeInterval = null;
-                stopLobbyMusic();
-                console.log('Lobby music fade complete, stopped');
-            }
+        if (currentStep >= steps || newVolume <= 0) {
+            clearInterval(musicFadeInterval);
+            musicFadeInterval = null;
+            audio.pause();
+            audio.currentTime = 0;
+            audio.volume = 1.0;
+            console.log('Lobby music fade complete, stopped');
         }
     }, stepDelay);
 }
 
 /**
- * Play a sound effect by buffer name.
+ * Play a short sound effect by element ID.
+ * Resets currentTime so rapid calls don't overlap stale playback.
  * Optional rate parameter adjusts playback speed/pitch (default 1.0).
  */
-function playSfx(bufferName, rate) {
-    if (!audioCtx || !audioBuffers[bufferName]) {
-        console.warn('playSfx: audio not ready for ' + bufferName);
-        return;
-    }
-
-    resumeAudioContext();
-
-    var source = audioCtx.createBufferSource();
-    source.buffer = audioBuffers[bufferName];
-    source.playbackRate.value = rate || 1.0;
-    source.connect(audioCtx.destination);
-    source.start(0);
+function playSfx(elementId, rate) {
+    var audio = document.getElementById(elementId);
+    if (!audio) return;
+    audio.currentTime = 0;
+    audio.playbackRate = rate || 1.0;
+    audio.play().catch(function(e) {
+        console.warn('SFX play failed (' + elementId + '):', e.message);
+    });
 }
 
 function stopLobbyMusic() {
     // Cancel any pending deferred play
     pendingMusicFadeIn = null;
+
+    var audio = document.getElementById('lobby-music');
+    if (!audio) return;
 
     // Clear any ongoing fades
     if (musicFadeInInterval) {
@@ -1420,15 +1339,9 @@ function stopLobbyMusic() {
         musicFadeInterval = null;
     }
 
-    if (musicSourceNode) {
-        try { musicSourceNode.stop(); } catch (_) {}
-        musicSourceNode.disconnect();
-        musicSourceNode = null;
-    }
-    if (musicGainNode) {
-        musicGainNode.disconnect();
-        musicGainNode = null;
-    }
+    audio.pause();
+    audio.currentTime = 0;
+    audio.volume = 1.0;
     console.log('Lobby music stopped immediately');
 }
 
@@ -1458,8 +1371,6 @@ function initReceiver() {
     // Handle sender connected — notify sender that receiver is ready for messages
     context.addEventListener(cast.framework.system.EventType.SENDER_CONNECTED, (event) => {
         console.log('Sender connected:', event);
-        // Resume AudioContext on sender connect (framework-trusted event)
-        resumeAudioContext();
         // Reset to connecting screen to clear any stale state from a previous session
         showScreen('connecting');
         // Clear any running tutorial
