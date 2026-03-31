@@ -1267,19 +1267,49 @@ function fadeStopLobbyMusic(fadeDurationMs) {
     }, stepDelay);
 }
 
-/**
- * Play a short sound effect by element ID.
- * Resets currentTime so rapid calls don't overlap stale playback.
- * Optional rate parameter adjusts playback speed/pitch (default 1.0).
- */
-function playSfx(elementId, rate) {
-    const audio = document.getElementById(elementId);
-    if (!audio) return;
-    audio.currentTime = 0;
-    audio.playbackRate = rate || 1.0;
-    audio.play().catch(e => {
-        console.warn('SFX play failed (' + elementId + '):', e.message);
+// ── Sound Effects (Web Audio API) ────────────────────────────────────
+//
+// SFX use Web Audio API because multiple <audio> elements with
+// preload="auto" prevent the lobby music <audio> element from working
+// on Chromecast. Short clips decode fine via decodeAudioData.
+
+var sfxCtx = null;
+var sfxBuffers = {};
+
+function initSfx() {
+    try {
+        sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
+        console.log('SFX AudioContext created, state=' + sfxCtx.state);
+    } catch (e) {
+        console.warn('SFX AudioContext failed:', e.message);
+        return;
+    }
+
+    var files = { tick: 'tick.m4a', tock: 'tock.m4a', bell: 'bell_ding.m4a' };
+    Object.entries(files).forEach(function(entry) {
+        var name = entry[0], url = entry[1];
+        fetch(url)
+            .then(function(r) { return r.arrayBuffer(); })
+            .then(function(buf) { return sfxCtx.decodeAudioData(buf); })
+            .then(function(decoded) {
+                sfxBuffers[name] = decoded;
+                console.log('SFX loaded: ' + name);
+            })
+            .catch(function(e) { console.warn('SFX load failed ' + name + ':', e.message); });
     });
+}
+
+function playSfx(elementId, rate) {
+    var nameMap = { 'sfx-tick': 'tick', 'sfx-tock': 'tock', 'sfx-bell': 'bell' };
+    var name = nameMap[elementId] || elementId;
+    if (!sfxCtx || !sfxBuffers[name]) return;
+    if (sfxCtx.state === 'suspended') sfxCtx.resume();
+
+    var src = sfxCtx.createBufferSource();
+    src.buffer = sfxBuffers[name];
+    src.playbackRate.value = rate || 1.0;
+    src.connect(sfxCtx.destination);
+    src.start(0);
 }
 
 function stopLobbyMusic() {
@@ -1346,6 +1376,11 @@ function initReceiver() {
 
     // Start the receiver
     context.start(options);
+
+    // Pre-fetch and decode sound effect files via Web Audio API
+    // (SFX can't use <audio> elements — multiple elements with preload
+    // prevent the lobby music element from playing on Chromecast)
+    initSfx();
 
     console.log('Cast Receiver started');
 }
