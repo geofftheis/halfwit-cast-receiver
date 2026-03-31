@@ -1267,33 +1267,27 @@ function fadeStopLobbyMusic(fadeDurationMs) {
     }, stepDelay);
 }
 
-// ── Sound Effects (Web Audio API) ────────────────────────────────────
+// ── Sound Effects (single shared <audio> element) ───────────────────
 //
-// SFX use Web Audio API because multiple <audio> elements with
-// preload="auto" prevent the lobby music <audio> element from working
-// on Chromecast. Short clips decode fine via decodeAudioData.
+// Multiple <audio> elements with preload="auto" prevent the lobby music
+// element from working on Chromecast. Instead, pre-fetch SFX files as
+// blobs and play them through a single dynamically-created <audio> element.
 
-var sfxCtx = null;
-var sfxBuffers = {};
+var sfxBlobUrls = {};
+var sfxAudio = null;
 
 function initSfx() {
-    try {
-        sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
-        console.log('SFX AudioContext created, state=' + sfxCtx.state);
-    } catch (e) {
-        console.warn('SFX AudioContext failed:', e.message);
-        return;
-    }
+    // Create a single shared audio element for SFX (not added to DOM with preload)
+    sfxAudio = document.createElement('audio');
 
     var files = { tick: 'tick.m4a', tock: 'tock.m4a', bell: 'bell_ding.m4a' };
     Object.entries(files).forEach(function(entry) {
         var name = entry[0], url = entry[1];
         fetch(url)
-            .then(function(r) { return r.arrayBuffer(); })
-            .then(function(buf) { return sfxCtx.decodeAudioData(buf); })
-            .then(function(decoded) {
-                sfxBuffers[name] = decoded;
-                console.log('SFX loaded: ' + name);
+            .then(function(r) { return r.blob(); })
+            .then(function(blob) {
+                sfxBlobUrls[name] = URL.createObjectURL(blob);
+                console.log('SFX loaded: ' + name + ' (' + blob.size + ' bytes)');
             })
             .catch(function(e) { console.warn('SFX load failed ' + name + ':', e.message); });
     });
@@ -1302,14 +1296,20 @@ function initSfx() {
 function playSfx(elementId, rate) {
     var nameMap = { 'sfx-tick': 'tick', 'sfx-tock': 'tock', 'sfx-bell': 'bell' };
     var name = nameMap[elementId] || elementId;
-    if (!sfxCtx || !sfxBuffers[name]) return;
-    if (sfxCtx.state === 'suspended') sfxCtx.resume();
+    var blobUrl = sfxBlobUrls[name];
+    if (!sfxAudio || !blobUrl) {
+        console.warn('SFX not ready: ' + name + ' audio=' + !!sfxAudio + ' blob=' + !!blobUrl);
+        return;
+    }
 
-    var src = sfxCtx.createBufferSource();
-    src.buffer = sfxBuffers[name];
-    src.playbackRate.value = rate || 1.0;
-    src.connect(sfxCtx.destination);
-    src.start(0);
+    // Create a fresh element each time to allow overlapping sounds
+    var audio = new Audio(blobUrl);
+    if (rate && rate !== 1.0) audio.playbackRate = rate;
+    audio.play().then(function() {
+        console.log('SFX played: ' + name);
+    }).catch(function(e) {
+        console.warn('SFX play failed ' + name + ': ' + e.message);
+    });
 }
 
 function stopLobbyMusic() {
