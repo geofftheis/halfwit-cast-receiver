@@ -319,20 +319,20 @@ function handleMessage(message) {
                 stopLobbyMusic();
                 break;
 
-            case 'play_tick':
-                playSfx('sfx-tick');
+            case 'play_countdown':
+                playSfx('countdown');
                 break;
 
-            case 'play_tock':
-                playSfx('sfx-tock');
+            case 'stop_countdown':
+                stopSfx();
                 break;
 
             case 'play_bell':
-                playSfx('sfx-bell');
+                playSfx('bell');
                 break;
 
             case 'play_vote_tick':
-                playSfx('sfx-tick', 1.8);
+                playSfx('tick', 1.8);
                 break;
 
             default:
@@ -1293,7 +1293,7 @@ function initSfx() {
     console.log('SFX: loading sound effects...');
 
     // Load sequentially to avoid network contention that causes lobby music stutter
-    var files = [['tick', 'tick.m4a'], ['tock', 'tock.m4a'], ['bell', 'bell_ding.m4a']];
+    var files = [['countdown', 'countdown.m4a'], ['bell', 'bell_ding.m4a'], ['tick', 'tick.m4a']];
     var loadNext = function(i) {
         if (i >= files.length) {
             console.log('SFX: all sound effects loaded');
@@ -1315,9 +1315,7 @@ function initSfx() {
     loadNext(0);
 }
 
-function playSfx(elementId, rate) {
-    var nameMap = { 'sfx-tick': 'tick', 'sfx-tock': 'tock', 'sfx-bell': 'bell' };
-    var name = nameMap[elementId] || elementId;
+function playSfx(name, rate) {
     var blobUrl = sfxBlobUrls[name];
     var audio = document.getElementById('game-audio');
     if (!audio || !blobUrl) {
@@ -1336,6 +1334,17 @@ function playSfx(elementId, rate) {
     }).catch(function(e) {
         console.warn('SFX play failed ' + name + ': ' + e.message);
     });
+}
+
+function stopSfx() {
+    var audio = document.getElementById('game-audio');
+    if (!audio || audio.paused) return;
+    // Only stop if currently playing a SFX (not lobby music)
+    if (!audio.src.includes('lobby_music')) {
+        audio.pause();
+        audio.currentTime = 0;
+        console.log('SFX stopped');
+    }
 }
 
 function stopLobbyMusic() {
