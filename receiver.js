@@ -332,7 +332,7 @@ function handleMessage(message) {
                 break;
 
             case 'play_vote_tick':
-                playSfx('tick', 1.8);
+                playSfx('vote', 1.8);
                 break;
 
             default:
@@ -1293,7 +1293,7 @@ function initSfx() {
     console.log('SFX: loading sound effects...');
 
     // Load sequentially to avoid network contention that causes lobby music stutter
-    var files = [['countdown', 'countdown.m4a'], ['bell', 'bell_ding.m4a'], ['tick', 'tick.m4a']];
+    var files = [['countdown', 'countdown.m4a'], ['bell', 'bell_ding.m4a'], ['vote', 'vote.m4a']];
     var loadNext = function(i) {
         if (i >= files.length) {
             console.log('SFX: all sound effects loaded');
