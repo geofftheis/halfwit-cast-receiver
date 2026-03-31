@@ -1184,16 +1184,14 @@ function startTutorial(data) {
     console.log('Tutorial started, total duration: ' + t + 'ms');
 }
 
-// ── Web Audio API Sound System ──────────────────────────────────────
+// ── Audio System ────────────────────────────────────────────────────
 //
-// HTML5 <audio> elements play() succeeds on Chromecast but produces no
-// audible output. Web Audio API (AudioContext.destination) does produce
-// sound. Force sampleRate to 44100 to match the source files and avoid
-// the slow/distorted playback caused by sample rate mismatch.
+// HTML5 <audio> elements handle decoding (correct speed/quality).
+// An AudioContext routes their output via MediaElementAudioSourceNode
+// to AudioContext.destination, which is the only output path that
+// produces audible sound on Chromecast.
 
 var audioCtx = null;
-var audioBuffers = {};
-var musicSource = null;
 var musicGain = null;
 var musicFadeInterval = null;
 var musicFadeInInterval = null;
@@ -1210,79 +1208,78 @@ function dbg(msg) {
 
 function initAudio() {
     try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         dbg('AudioCtx: state=' + audioCtx.state + ' rate=' + audioCtx.sampleRate);
     } catch (e) {
         dbg('AudioCtx FAILED: ' + e.message);
         return;
     }
 
-    var files = {
-        lobby_music: 'lobby_music.m4a?v=2',
-        tick: 'tick.m4a?v=2',
-        tock: 'tock.m4a?v=2',
-        bell: 'bell_ding.m4a?v=2'
-    };
+    // Route lobby music through AudioContext with a GainNode for fading
+    var music = document.getElementById('lobby-music');
+    if (music) {
+        musicGain = audioCtx.createGain();
+        musicGain.connect(audioCtx.destination);
+        audioCtx.createMediaElementSource(music).connect(musicGain);
+        dbg('Lobby music routed through AudioCtx');
+    }
 
-    Object.entries(files).forEach(function(entry) {
-        var name = entry[0], url = entry[1];
-        fetch(url)
-            .then(function(r) { return r.arrayBuffer(); })
-            .then(function(buf) { return audioCtx.decodeAudioData(buf); })
-            .then(function(decoded) {
-                audioBuffers[name] = decoded;
-                dbg('Loaded ' + name + ' (' + decoded.duration.toFixed(1) + 's, ' + decoded.sampleRate + 'Hz)');
-            })
-            .catch(function(e) { dbg('FAIL ' + name + ': ' + e.message); });
+    // Route SFX through AudioContext
+    ['sfx-tick', 'sfx-tock', 'sfx-bell'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            audioCtx.createMediaElementSource(el).connect(audioCtx.destination);
+        }
     });
+    dbg('SFX routed through AudioCtx');
 }
 
 function startLobbyMusic(fadeInDurationMs) {
-    if (!audioCtx || !audioBuffers.lobby_music) {
-        dbg('startLobbyMusic: not ready, ctx=' + !!audioCtx + ' buf=' + !!audioBuffers.lobby_music);
-        return;
-    }
-    if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+    var audio = document.getElementById('lobby-music');
+    if (!audio) return;
 
-    // Stop any current music
-    stopLobbyMusic();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
-    musicGain = audioCtx.createGain();
-    musicGain.gain.value = 0;
-    musicGain.connect(audioCtx.destination);
+    if (musicFadeInterval) { clearInterval(musicFadeInterval); musicFadeInterval = null; }
+    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
 
-    musicSource = audioCtx.createBufferSource();
-    musicSource.buffer = audioBuffers.lobby_music;
-    musicSource.loop = true;
-    musicSource.connect(musicGain);
-    musicSource.start(0);
+    audio.currentTime = 0;
+    audio.volume = 1;
+    if (musicGain) musicGain.gain.value = 0;
 
-    dbg('Music started, fading in ' + fadeInDurationMs + 'ms (rate=' + audioCtx.sampleRate + ')');
+    dbg('Calling audio.play()...');
+    audio.play().then(function() {
+        dbg('play() OK dur=' + audio.duration.toFixed(1) + 's');
 
-    // Fade in
-    if (fadeInDurationMs && fadeInDurationMs > 0) {
-        var steps = 30;
-        var stepDelay = fadeInDurationMs / steps;
-        var currentStep = 0;
+        // Fade in via GainNode
+        if (fadeInDurationMs && fadeInDurationMs > 0 && musicGain) {
+            var steps = 30;
+            var stepDelay = fadeInDurationMs / steps;
+            var currentStep = 0;
 
-        musicFadeInInterval = setInterval(function() {
-            currentStep++;
-            var vol = Math.min(1.0, currentStep / steps);
-            if (musicGain) musicGain.gain.value = vol;
-            if (currentStep >= steps) {
-                clearInterval(musicFadeInInterval);
-                musicFadeInInterval = null;
-                if (musicGain) musicGain.gain.value = 1.0;
-                dbg('Fade in complete');
-            }
-        }, stepDelay);
-    } else {
-        musicGain.gain.value = 1.0;
-    }
+            musicFadeInInterval = setInterval(function() {
+                currentStep++;
+                var vol = Math.min(1.0, currentStep / steps);
+                musicGain.gain.value = vol;
+                if (currentStep >= steps) {
+                    clearInterval(musicFadeInInterval);
+                    musicFadeInInterval = null;
+                    musicGain.gain.value = 1.0;
+                    dbg('Fade in complete');
+                }
+            }, stepDelay);
+        } else if (musicGain) {
+            musicGain.gain.value = 1.0;
+        }
+    }).catch(function(e) {
+        dbg('play() FAILED: ' + e.name + ': ' + e.message);
+    });
 }
 
 function fadeStopLobbyMusic(fadeDurationMs) {
-    if (!musicSource || !musicGain) return;
+    var audio = document.getElementById('lobby-music');
+    if (!audio || audio.paused) return;
+    if (!musicGain) return;
 
     if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
     if (musicFadeInterval) { clearInterval(musicFadeInterval); }
@@ -1295,40 +1292,37 @@ function fadeStopLobbyMusic(fadeDurationMs) {
     musicFadeInterval = setInterval(function() {
         currentStep++;
         var vol = Math.max(0, startVol * (1 - currentStep / steps));
-        if (musicGain) musicGain.gain.value = vol;
+        musicGain.gain.value = vol;
         if (currentStep >= steps || vol <= 0) {
             clearInterval(musicFadeInterval);
             musicFadeInterval = null;
-            stopLobbyMusic();
+            audio.pause();
+            audio.currentTime = 0;
+            musicGain.gain.value = 1.0;
         }
     }, stepDelay);
 }
 
 function playSfx(elementId, rate) {
-    var nameMap = { 'sfx-tick': 'tick', 'sfx-tock': 'tock', 'sfx-bell': 'bell' };
-    var name = nameMap[elementId] || elementId;
-    if (!audioCtx || !audioBuffers[name]) return;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    var src = audioCtx.createBufferSource();
-    src.buffer = audioBuffers[name];
-    src.playbackRate.value = rate || 1.0;
-    src.connect(audioCtx.destination);
-    src.start(0);
+    var audio = document.getElementById(elementId);
+    if (!audio) return;
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    audio.currentTime = 0;
+    audio.playbackRate = rate || 1.0;
+    audio.play().catch(function(e) {
+        console.warn('SFX play failed (' + elementId + '):', e.message);
+    });
 }
 
 function stopLobbyMusic() {
     if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
     if (musicFadeInterval) { clearInterval(musicFadeInterval); musicFadeInterval = null; }
-    if (musicSource) {
-        try { musicSource.stop(); } catch(e) {}
-        musicSource.disconnect();
-        musicSource = null;
+    var audio = document.getElementById('lobby-music');
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
     }
-    if (musicGain) {
-        musicGain.disconnect();
-        musicGain = null;
-    }
+    if (musicGain) musicGain.gain.value = 1.0;
 }
 
 /**
