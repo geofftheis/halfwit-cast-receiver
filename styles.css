@@ -95,15 +95,14 @@ body {
 }
 
 .logo-image {
-    height: clamp(140px, 25vh, 210px);
+    height: clamp(140px, 16vw, 210px);
     width: auto;
-    max-width: 100%;
     margin-bottom: clamp(12px, 1.5vw, 20px);
 }
 
 /* Connecting screen logo - twice the normal size */
 .logo-image.connecting-logo {
-    height: clamp(220px, 40vh, 378px);
+    height: clamp(220px, 30vw, 378px);
     margin-bottom: clamp(16px, 2.5vw, 30px);
 }
 
@@ -133,7 +132,7 @@ body {
 
 /* Loading Screen */
 #loading-screen .logo-image {
-    height: clamp(220px, 40vh, 378px);
+    height: clamp(220px, 30vw, 378px);
 }
 
 /* Lobby Screen */
@@ -163,7 +162,7 @@ body {
 }
 
 #lobby-screen .logo-image {
-    height: clamp(180px, 35vh, 300px);
+    height: clamp(180px, 24vw, 300px);
     margin-bottom: clamp(16px, 2.5vw, 30px);
 }
 
@@ -176,6 +175,12 @@ body {
     font-size: clamp(32px, 3.8vw, 48px);
     font-weight: bold;
     color: var(--halfwit-lime);
+}
+
+#lobby-screen .host-info {
+    font-size: clamp(16px, 1.9vw, 24px);
+    color: var(--halfwit-white);
+    opacity: 0.8;
 }
 
 #lobby-screen .game-settings {
@@ -923,7 +928,7 @@ body {
 }
 
 #end-screen .logo-image {
-    height: clamp(220px, 40vh, 378px);
+    height: clamp(220px, 30vw, 378px);
 }
 
 #end-screen .status {

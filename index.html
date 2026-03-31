@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>Half-Wit - Cast Receiver</title>
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css">
     <!-- Google Cast Receiver SDK -->
     <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 </head>
@@ -27,6 +24,7 @@
                     <img src="halfwit_logo.png" alt="Half-Wit" class="logo-image">
                     <div class="header">
                         <div class="game-name"></div>
+                        <div class="host-info">Hosted by <span class="host-name"></span></div>
                     </div>
                     <div class="game-settings">
                         <span class="player-count"></span>
@@ -278,13 +276,8 @@
     </div>
 
     <!-- Lobby/results background music (controlled by sender via custom messages) -->
-    <audio id="lobby-music" src="lobby_music.m4a?v=2" preload="auto" loop></audio>
+    <audio id="lobby-music" src="lobby_music.m4a" preload="auto" loop></audio>
 
-    <!-- Countdown sound effects (controlled by sender via custom messages) -->
-    <audio id="sfx-tick" src="tick.m4a?v=2" preload="auto"></audio>
-    <audio id="sfx-tock" src="tock.m4a?v=2" preload="auto"></audio>
-    <audio id="sfx-bell" src="bell_ding.m4a?v=2" preload="auto"></audio>
-
-    <script src="receiver.js?v=13"></script>
+    <script src="receiver.js"></script>
 </body>
 </html>
