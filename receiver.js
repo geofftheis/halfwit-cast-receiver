@@ -1183,88 +1183,110 @@ function startTutorial(data) {
     console.log('Tutorial started, total duration: ' + t + 'ms');
 }
 
-// ── Lobby/Results Background Music ──────────────────────────────────
+// ── Audio System ────────────────────────────────────────────────────
+//
+// HTML5 <audio> elements handle decoding (correct speed/quality).
+// A MediaElementAudioSourceNode routes each element's output through
+// an AudioContext, which is the output path that produces audible
+// sound on Chromecast. Fade control uses a GainNode on the music.
 
-let musicFadeInterval = null;
-let musicFadeInInterval = null;
+var audioCtx = null;
+var musicGain = null;
+var musicFadeInterval = null;
+var musicFadeInInterval = null;
+
+function initAudio() {
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        console.log('AudioContext created, state=' + audioCtx.state + ', rate=' + audioCtx.sampleRate);
+    } catch (e) {
+        console.error('AudioContext failed:', e.message);
+        return;
+    }
+
+    // Route lobby music through AudioContext with a GainNode for fading
+    var music = document.getElementById('lobby-music');
+    if (music) {
+        musicGain = audioCtx.createGain();
+        musicGain.connect(audioCtx.destination);
+        audioCtx.createMediaElementSource(music).connect(musicGain);
+        console.log('Lobby music routed through AudioContext');
+    }
+
+    // Route SFX through AudioContext
+    ['sfx-tick', 'sfx-tock', 'sfx-bell'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            audioCtx.createMediaElementSource(el).connect(audioCtx.destination);
+        }
+    });
+    console.log('SFX routed through AudioContext');
+}
 
 function startLobbyMusic(fadeInDurationMs) {
-    const audio = document.getElementById('lobby-music');
+    var audio = document.getElementById('lobby-music');
     if (!audio) return;
 
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+
     // Clear any ongoing fades
-    if (musicFadeInterval) {
-        clearInterval(musicFadeInterval);
-        musicFadeInterval = null;
-    }
-    if (musicFadeInInterval) {
-        clearInterval(musicFadeInInterval);
-        musicFadeInInterval = null;
-    }
+    if (musicFadeInterval) { clearInterval(musicFadeInterval); musicFadeInterval = null; }
+    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
 
     audio.currentTime = 0;
-    audio.volume = 0;
-    audio.play().then(() => {
+    audio.volume = 1;  // Element volume stays at max; fade via GainNode
+    if (musicGain) musicGain.gain.value = 0;
+
+    audio.play().then(function() {
         console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
 
-        // Fade in
-        if (fadeInDurationMs && fadeInDurationMs > 0) {
+        // Fade in via GainNode
+        if (fadeInDurationMs && fadeInDurationMs > 0 && musicGain) {
             var steps = 30;
             var stepDelay = fadeInDurationMs / steps;
-            var volumeStep = 1.0 / steps;
             var currentStep = 0;
 
             musicFadeInInterval = setInterval(function() {
                 currentStep++;
-                var newVolume = Math.min(1.0, audio.volume + volumeStep);
-                audio.volume = newVolume;
-                if (currentStep >= steps || newVolume >= 1.0) {
+                musicGain.gain.value = Math.min(1.0, currentStep / steps);
+                if (currentStep >= steps) {
                     clearInterval(musicFadeInInterval);
                     musicFadeInInterval = null;
-                    audio.volume = 1.0;
+                    musicGain.gain.value = 1.0;
                 }
             }, stepDelay);
-        } else {
-            audio.volume = 1.0;
+        } else if (musicGain) {
+            musicGain.gain.value = 1.0;
         }
-    }).catch(e => {
+    }).catch(function(e) {
         console.warn('Lobby music play failed:', e.message);
     });
 }
 
 function fadeStopLobbyMusic(fadeDurationMs) {
-    const audio = document.getElementById('lobby-music');
+    var audio = document.getElementById('lobby-music');
     if (!audio || audio.paused) return;
+    if (!musicGain) return;
 
-    // Clear any in-progress fade-in
-    if (musicFadeInInterval) {
-        clearInterval(musicFadeInInterval);
-        musicFadeInInterval = null;
-    }
+    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
+    if (musicFadeInterval) { clearInterval(musicFadeInterval); }
 
-    // Clear any previous fade-out
-    if (musicFadeInterval) {
-        clearInterval(musicFadeInterval);
-    }
-
-    const steps = 30;
-    const stepDelay = fadeDurationMs / steps;
-    const volumeStep = audio.volume / steps;
-    let currentStep = 0;
+    var steps = 30;
+    var stepDelay = fadeDurationMs / steps;
+    var startVol = musicGain.gain.value;
+    var currentStep = 0;
 
     console.log('Lobby music fading out over ' + fadeDurationMs + 'ms');
 
-    musicFadeInterval = setInterval(() => {
+    musicFadeInterval = setInterval(function() {
         currentStep++;
-        const newVolume = Math.max(0, audio.volume - volumeStep);
-        audio.volume = newVolume;
-
-        if (currentStep >= steps || newVolume <= 0) {
+        musicGain.gain.value = Math.max(0, startVol * (1 - currentStep / steps));
+        if (currentStep >= steps || musicGain.gain.value <= 0) {
             clearInterval(musicFadeInterval);
             musicFadeInterval = null;
             audio.pause();
             audio.currentTime = 0;
-            audio.volume = 1.0;
+            musicGain.gain.value = 1.0;
             console.log('Lobby music fade complete, stopped');
         }
     }, stepDelay);
@@ -1272,37 +1294,29 @@ function fadeStopLobbyMusic(fadeDurationMs) {
 
 /**
  * Play a short sound effect by element ID.
- * Resets currentTime so rapid calls don't overlap stale playback.
- * Optional rate parameter adjusts playback speed/pitch (default 1.0).
+ * Audio is routed through AudioContext via MediaElementAudioSourceNode.
  */
 function playSfx(elementId, rate) {
-    const audio = document.getElementById(elementId);
+    var audio = document.getElementById(elementId);
     if (!audio) return;
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     audio.currentTime = 0;
     audio.playbackRate = rate || 1.0;
-    audio.play().catch(e => {
+    audio.play().catch(function(e) {
         console.warn('SFX play failed (' + elementId + '):', e.message);
     });
 }
 
 function stopLobbyMusic() {
-    const audio = document.getElementById('lobby-music');
-    if (!audio) return;
-
-    // Clear any ongoing fades
-    if (musicFadeInInterval) {
-        clearInterval(musicFadeInInterval);
-        musicFadeInInterval = null;
+    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
+    if (musicFadeInterval) { clearInterval(musicFadeInterval); musicFadeInterval = null; }
+    var audio = document.getElementById('lobby-music');
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
     }
-    if (musicFadeInterval) {
-        clearInterval(musicFadeInterval);
-        musicFadeInterval = null;
-    }
-
-    audio.pause();
-    audio.currentTime = 0;
-    audio.volume = 1.0;
-    console.log('Lobby music stopped immediately');
+    if (musicGain) musicGain.gain.value = 1.0;
+    console.log('Lobby music stopped');
 }
 
 /**
@@ -1349,6 +1363,9 @@ function initReceiver() {
 
     // Start the receiver
     context.start(options);
+
+    // Route HTML5 audio elements through AudioContext for Chromecast output
+    initAudio();
 
     console.log('Cast Receiver started');
 }
