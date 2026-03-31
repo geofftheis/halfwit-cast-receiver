@@ -304,6 +304,7 @@ function handleMessage(message) {
 
             case 'end':
                 showScreen('end');
+                setTimeout(() => stopLobbyMusic(), 2000);
                 break;
 
             case 'music_start':
@@ -311,11 +312,27 @@ function handleMessage(message) {
                 break;
 
             case 'music_fade_stop':
-                fadeStopLobbyMusic(data.fadeDurationMs || 3000);
+                fadeStopLobbyMusic(data.fadeDurationMs || 2000);
                 break;
 
             case 'music_stop':
                 stopLobbyMusic();
+                break;
+
+            case 'play_tick':
+                playSfx('sfx-tick');
+                break;
+
+            case 'play_tock':
+                playSfx('sfx-tock');
+                break;
+
+            case 'play_bell':
+                playSfx('sfx-bell');
+                break;
+
+            case 'play_vote_tick':
+                playSfx('sfx-tick', 1.8);
                 break;
 
             default:
@@ -333,7 +350,6 @@ function updateLobbyScreen(data) {
     const screen = screens.lobby;
 
     screen.querySelector('.game-name').textContent = data.gameName;
-    screen.querySelector('.host-name').textContent = data.hostName;
     screen.querySelector('.player-count').textContent = data.players.length + '/' + data.maxPlayers + ' players';
     screen.querySelector('.round-count').textContent = data.totalRounds + ' rounds';
 
@@ -1251,6 +1267,21 @@ function fadeStopLobbyMusic(fadeDurationMs) {
     }, stepDelay);
 }
 
+/**
+ * Play a short sound effect by element ID.
+ * Resets currentTime so rapid calls don't overlap stale playback.
+ * Optional rate parameter adjusts playback speed/pitch (default 1.0).
+ */
+function playSfx(elementId, rate) {
+    const audio = document.getElementById(elementId);
+    if (!audio) return;
+    audio.currentTime = 0;
+    audio.playbackRate = rate || 1.0;
+    audio.play().catch(e => {
+        console.warn('SFX play failed (' + elementId + '):', e.message);
+    });
+}
+
 function stopLobbyMusic() {
     const audio = document.getElementById('lobby-music');
     if (!audio) return;
@@ -1306,9 +1337,10 @@ function initReceiver() {
     // Handle sender disconnected
     context.addEventListener(cast.framework.system.EventType.SENDER_DISCONNECTED, (event) => {
         console.log('Sender disconnected:', event);
-        // If no more senders, show end screen
+        // If no more senders, show end screen and stop any playing music
         if (context.getSenders().length === 0) {
             showScreen('end');
+            setTimeout(() => stopLobbyMusic(), 2000);
         }
     });
 
