@@ -1186,7 +1186,7 @@ let musicFadeInterval = null;
 let musicFadeInInterval = null;
 
 function startLobbyMusic(fadeInDurationMs) {
-    const audio = document.getElementById('lobby-music');
+    const audio = document.getElementById('game-audio');
     if (!audio) return;
 
     // Clear any ongoing fades
@@ -1199,6 +1199,14 @@ function startLobbyMusic(fadeInDurationMs) {
         musicFadeInInterval = null;
     }
 
+    // Restore lobby music src if element was used for SFX
+    if (!audio.src.includes('lobby_music')) {
+        audio.src = 'lobby_music.m4a';
+        audio.loop = true;
+        audio.load();
+    }
+
+    var maxVolume = 0.8;
     audio.currentTime = 0;
     audio.volume = 0;
     audio.play().then(() => {
@@ -1211,21 +1219,21 @@ function startLobbyMusic(fadeInDurationMs) {
         if (fadeInDurationMs && fadeInDurationMs > 0) {
             var steps = 30;
             var stepDelay = fadeInDurationMs / steps;
-            var volumeStep = 1.0 / steps;
+            var volumeStep = maxVolume / steps;
             var currentStep = 0;
 
             musicFadeInInterval = setInterval(function() {
                 currentStep++;
-                var newVolume = Math.min(1.0, audio.volume + volumeStep);
+                var newVolume = Math.min(maxVolume, audio.volume + volumeStep);
                 audio.volume = newVolume;
-                if (currentStep >= steps || newVolume >= 1.0) {
+                if (currentStep >= steps || newVolume >= maxVolume) {
                     clearInterval(musicFadeInInterval);
                     musicFadeInInterval = null;
-                    audio.volume = 1.0;
+                    audio.volume = maxVolume;
                 }
             }, stepDelay);
         } else {
-            audio.volume = 1.0;
+            audio.volume = maxVolume;
         }
     }).catch(e => {
         console.warn('Lobby music play failed:', e.message);
@@ -1233,7 +1241,7 @@ function startLobbyMusic(fadeInDurationMs) {
 }
 
 function fadeStopLobbyMusic(fadeDurationMs) {
-    const audio = document.getElementById('lobby-music');
+    const audio = document.getElementById('game-audio');
     if (!audio || audio.paused) return;
 
     // Clear any in-progress fade-in
@@ -1264,17 +1272,17 @@ function fadeStopLobbyMusic(fadeDurationMs) {
             musicFadeInterval = null;
             audio.pause();
             audio.currentTime = 0;
-            audio.volume = 1.0;
+            audio.volume = 0.8;
             console.log('Lobby music fade complete, stopped');
         }
     }, stepDelay);
 }
 
-// ── Sound Effects (single shared <audio> element) ───────────────────
+// ── Sound Effects ────────────────────────────────────────────────────
 //
-// Multiple <audio> elements with preload="auto" prevent the lobby music
-// element from working on Chromecast. Instead, pre-fetch SFX files as
-// blobs and play them through a single dynamically-created <audio> element.
+// Chromecast only outputs audio from a single <audio> element. SFX reuse
+// the same game-audio element (lobby music is always stopped before SFX).
+// Files are pre-fetched as blobs for instant playback.
 
 var sfxBlobUrls = {};
 var sfxInitStarted = false;
@@ -1311,15 +1319,17 @@ function playSfx(elementId, rate) {
     var nameMap = { 'sfx-tick': 'tick', 'sfx-tock': 'tock', 'sfx-bell': 'bell' };
     var name = nameMap[elementId] || elementId;
     var blobUrl = sfxBlobUrls[name];
-    var audio = document.getElementById('sfx-player');
+    var audio = document.getElementById('game-audio');
     if (!audio || !blobUrl) {
         console.warn('SFX not ready: ' + name + ' audio=' + !!audio + ' blob=' + !!blobUrl);
         return;
     }
 
-    // Reuse the single DOM element — swap src and play
+    // Reuse the single audio element — swap src and play
+    audio.loop = false;
     audio.src = blobUrl;
     audio.playbackRate = rate || 1.0;
+    audio.volume = 1.0;
     audio.load();
     audio.play().then(function() {
         console.log('SFX played: ' + name);
@@ -1329,7 +1339,7 @@ function playSfx(elementId, rate) {
 }
 
 function stopLobbyMusic() {
-    const audio = document.getElementById('lobby-music');
+    const audio = document.getElementById('game-audio');
     if (!audio) return;
 
     // Clear any ongoing fades
@@ -1344,7 +1354,7 @@ function stopLobbyMusic() {
 
     audio.pause();
     audio.currentTime = 0;
-    audio.volume = 1.0;
+    audio.volume = 0.8;
     console.log('Lobby music stopped immediately');
 }
 
