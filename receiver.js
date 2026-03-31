@@ -1184,10 +1184,19 @@ function startTutorial(data) {
     console.log('Tutorial started, total duration: ' + t + 'ms');
 }
 
-// ── Lobby/Results Background Music ──────────────────────────────────
+// ── Web Audio API Sound System ──────────────────────────────────────
+//
+// HTML5 <audio> elements play() succeeds on Chromecast but produces no
+// audible output. Web Audio API (AudioContext.destination) does produce
+// sound. Force sampleRate to 44100 to match the source files and avoid
+// the slow/distorted playback caused by sample rate mismatch.
 
-let musicFadeInterval = null;
-let musicFadeInInterval = null;
+var audioCtx = null;
+var audioBuffers = {};
+var musicSource = null;
+var musicGain = null;
+var musicFadeInterval = null;
+var musicFadeInInterval = null;
 
 function dbg(msg) {
     var el = document.getElementById('audio-debug');
@@ -1199,126 +1208,127 @@ function dbg(msg) {
     console.log('[AUDIO] ' + msg);
 }
 
-function startLobbyMusic(fadeInDurationMs) {
-    const audio = document.getElementById('lobby-music');
-    dbg('startLobbyMusic: element=' + !!audio + ', readyState=' + (audio ? audio.readyState : 'n/a') + ', networkState=' + (audio ? audio.networkState : 'n/a'));
-    if (!audio) return;
-
-    // Clear any ongoing fades
-    if (musicFadeInterval) {
-        clearInterval(musicFadeInterval);
-        musicFadeInterval = null;
-    }
-    if (musicFadeInInterval) {
-        clearInterval(musicFadeInInterval);
-        musicFadeInInterval = null;
+function initAudio() {
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+        dbg('AudioCtx: state=' + audioCtx.state + ' rate=' + audioCtx.sampleRate);
+    } catch (e) {
+        dbg('AudioCtx FAILED: ' + e.message);
+        return;
     }
 
-    audio.currentTime = 0;
-    audio.volume = 1;
-    dbg('Calling audio.play() vol=1...');
-    audio.play().then(() => {
-        dbg('play() OK dur=' + audio.duration.toFixed(1) + 's muted=' + audio.muted + ' vol=' + audio.volume + ' src=' + audio.src.split('/').pop());
-        console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
+    var files = {
+        lobby_music: 'lobby_music.m4a?v=2',
+        tick: 'tick.m4a?v=2',
+        tock: 'tock.m4a?v=2',
+        bell: 'bell_ding.m4a?v=2'
+    };
 
-        // Fade in
-        if (fadeInDurationMs && fadeInDurationMs > 0) {
-            var steps = 30;
-            var stepDelay = fadeInDurationMs / steps;
-            var volumeStep = 1.0 / steps;
-            var currentStep = 0;
-
-            musicFadeInInterval = setInterval(function() {
-                currentStep++;
-                var newVolume = Math.min(1.0, audio.volume + volumeStep);
-                audio.volume = newVolume;
-                if (currentStep >= steps || newVolume >= 1.0) {
-                    clearInterval(musicFadeInInterval);
-                    musicFadeInInterval = null;
-                    audio.volume = 1.0;
-                    dbg('Fade complete vol=' + audio.volume + ' paused=' + audio.paused + ' muted=' + audio.muted);
-                }
-            }, stepDelay);
-        } else {
-            audio.volume = 1.0;
-            dbg('Vol set to 1.0, muted=' + audio.muted);
-        }
-    }).catch(e => {
-        dbg('play() FAILED: ' + e.name + ': ' + e.message);
+    Object.entries(files).forEach(function(entry) {
+        var name = entry[0], url = entry[1];
+        fetch(url)
+            .then(function(r) { return r.arrayBuffer(); })
+            .then(function(buf) { return audioCtx.decodeAudioData(buf); })
+            .then(function(decoded) {
+                audioBuffers[name] = decoded;
+                dbg('Loaded ' + name + ' (' + decoded.duration.toFixed(1) + 's, ' + decoded.sampleRate + 'Hz)');
+            })
+            .catch(function(e) { dbg('FAIL ' + name + ': ' + e.message); });
     });
 }
 
+function startLobbyMusic(fadeInDurationMs) {
+    if (!audioCtx || !audioBuffers.lobby_music) {
+        dbg('startLobbyMusic: not ready, ctx=' + !!audioCtx + ' buf=' + !!audioBuffers.lobby_music);
+        return;
+    }
+    if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+
+    // Stop any current music
+    stopLobbyMusic();
+
+    musicGain = audioCtx.createGain();
+    musicGain.gain.value = 0;
+    musicGain.connect(audioCtx.destination);
+
+    musicSource = audioCtx.createBufferSource();
+    musicSource.buffer = audioBuffers.lobby_music;
+    musicSource.loop = true;
+    musicSource.connect(musicGain);
+    musicSource.start(0);
+
+    dbg('Music started, fading in ' + fadeInDurationMs + 'ms (rate=' + audioCtx.sampleRate + ')');
+
+    // Fade in
+    if (fadeInDurationMs && fadeInDurationMs > 0) {
+        var steps = 30;
+        var stepDelay = fadeInDurationMs / steps;
+        var currentStep = 0;
+
+        musicFadeInInterval = setInterval(function() {
+            currentStep++;
+            var vol = Math.min(1.0, currentStep / steps);
+            if (musicGain) musicGain.gain.value = vol;
+            if (currentStep >= steps) {
+                clearInterval(musicFadeInInterval);
+                musicFadeInInterval = null;
+                if (musicGain) musicGain.gain.value = 1.0;
+                dbg('Fade in complete');
+            }
+        }, stepDelay);
+    } else {
+        musicGain.gain.value = 1.0;
+    }
+}
+
 function fadeStopLobbyMusic(fadeDurationMs) {
-    const audio = document.getElementById('lobby-music');
-    if (!audio || audio.paused) return;
+    if (!musicSource || !musicGain) return;
 
-    // Clear any in-progress fade-in
-    if (musicFadeInInterval) {
-        clearInterval(musicFadeInInterval);
-        musicFadeInInterval = null;
-    }
+    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
+    if (musicFadeInterval) { clearInterval(musicFadeInterval); }
 
-    // Clear any previous fade-out
-    if (musicFadeInterval) {
-        clearInterval(musicFadeInterval);
-    }
+    var steps = 30;
+    var stepDelay = fadeDurationMs / steps;
+    var startVol = musicGain.gain.value;
+    var currentStep = 0;
 
-    const steps = 30;
-    const stepDelay = fadeDurationMs / steps;
-    const volumeStep = audio.volume / steps;
-    let currentStep = 0;
-
-    console.log('Lobby music fading out over ' + fadeDurationMs + 'ms');
-
-    musicFadeInterval = setInterval(() => {
+    musicFadeInterval = setInterval(function() {
         currentStep++;
-        const newVolume = Math.max(0, audio.volume - volumeStep);
-        audio.volume = newVolume;
-
-        if (currentStep >= steps || newVolume <= 0) {
+        var vol = Math.max(0, startVol * (1 - currentStep / steps));
+        if (musicGain) musicGain.gain.value = vol;
+        if (currentStep >= steps || vol <= 0) {
             clearInterval(musicFadeInterval);
             musicFadeInterval = null;
-            audio.pause();
-            audio.currentTime = 0;
-            audio.volume = 1.0;
-            console.log('Lobby music fade complete, stopped');
+            stopLobbyMusic();
         }
     }, stepDelay);
 }
 
-/**
- * Play a short sound effect by element ID.
- * Resets currentTime so rapid calls don't overlap stale playback.
- * Optional rate parameter adjusts playback speed/pitch (default 1.0).
- */
 function playSfx(elementId, rate) {
-    const audio = document.getElementById(elementId);
-    if (!audio) return;
-    audio.currentTime = 0;
-    audio.playbackRate = rate || 1.0;
-    audio.play().catch(e => {
-        console.warn('SFX play failed (' + elementId + '):', e.message);
-    });
+    var nameMap = { 'sfx-tick': 'tick', 'sfx-tock': 'tock', 'sfx-bell': 'bell' };
+    var name = nameMap[elementId] || elementId;
+    if (!audioCtx || !audioBuffers[name]) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    var src = audioCtx.createBufferSource();
+    src.buffer = audioBuffers[name];
+    src.playbackRate.value = rate || 1.0;
+    src.connect(audioCtx.destination);
+    src.start(0);
 }
 
 function stopLobbyMusic() {
-    const audio = document.getElementById('lobby-music');
-    if (!audio) return;
-
-    // Clear any ongoing fades
-    if (musicFadeInInterval) {
-        clearInterval(musicFadeInInterval);
-        musicFadeInInterval = null;
+    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
+    if (musicFadeInterval) { clearInterval(musicFadeInterval); musicFadeInterval = null; }
+    if (musicSource) {
+        try { musicSource.stop(); } catch(e) {}
+        musicSource.disconnect();
+        musicSource = null;
     }
-    if (musicFadeInterval) {
-        clearInterval(musicFadeInterval);
-        musicFadeInterval = null;
+    if (musicGain) {
+        musicGain.disconnect();
+        musicGain = null;
     }
-
-    audio.pause();
-    audio.currentTime = 0;
-    audio.volume = 1.0;
-    console.log('Lobby music stopped immediately');
 }
 
 /**
@@ -1365,6 +1375,9 @@ function initReceiver() {
 
     // Start the receiver
     context.start(options);
+
+    // Initialize Web Audio API and pre-fetch all audio files
+    initAudio();
 
     console.log('Cast Receiver started');
 }
