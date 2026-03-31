@@ -1184,10 +1184,6 @@ function startTutorial(data) {
 }
 
 // ── Lobby/Results Background Music ──────────────────────────────────
-//
-// Uses muted-autoplay workaround: Chrome allows autoplay of muted audio.
-// Start muted, call play(), then unmute once playing. This bypasses the
-// autoplay policy while keeping HTML5 decoding quality.
 
 let musicFadeInterval = null;
 let musicFadeInInterval = null;
@@ -1197,16 +1193,21 @@ function startLobbyMusic(fadeInDurationMs) {
     if (!audio) return;
 
     // Clear any ongoing fades
-    if (musicFadeInterval) { clearInterval(musicFadeInterval); musicFadeInterval = null; }
-    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
+    if (musicFadeInterval) {
+        clearInterval(musicFadeInterval);
+        musicFadeInterval = null;
+    }
+    if (musicFadeInInterval) {
+        clearInterval(musicFadeInInterval);
+        musicFadeInInterval = null;
+    }
 
     audio.currentTime = 0;
     audio.volume = 0;
-    audio.muted = true;  // Chrome allows autoplay of muted audio
     audio.play().then(() => {
-        audio.muted = false;  // Unmute after play starts
-        console.log('Lobby music started (muted-autoplay), fading in over ' + fadeInDurationMs + 'ms');
+        console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
 
+        // Fade in
         if (fadeInDurationMs && fadeInDurationMs > 0) {
             var steps = 30;
             var stepDelay = fadeInDurationMs / steps;
@@ -1235,8 +1236,16 @@ function fadeStopLobbyMusic(fadeDurationMs) {
     const audio = document.getElementById('lobby-music');
     if (!audio || audio.paused) return;
 
-    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
-    if (musicFadeInterval) { clearInterval(musicFadeInterval); }
+    // Clear any in-progress fade-in
+    if (musicFadeInInterval) {
+        clearInterval(musicFadeInInterval);
+        musicFadeInInterval = null;
+    }
+
+    // Clear any previous fade-out
+    if (musicFadeInterval) {
+        clearInterval(musicFadeInterval);
+    }
 
     const steps = 30;
     const stepDelay = fadeDurationMs / steps;
@@ -1249,6 +1258,7 @@ function fadeStopLobbyMusic(fadeDurationMs) {
         currentStep++;
         const newVolume = Math.max(0, audio.volume - volumeStep);
         audio.volume = newVolume;
+
         if (currentStep >= steps || newVolume <= 0) {
             clearInterval(musicFadeInterval);
             musicFadeInterval = null;
@@ -1262,16 +1272,15 @@ function fadeStopLobbyMusic(fadeDurationMs) {
 
 /**
  * Play a short sound effect by element ID.
+ * Resets currentTime so rapid calls don't overlap stale playback.
+ * Optional rate parameter adjusts playback speed/pitch (default 1.0).
  */
 function playSfx(elementId, rate) {
     const audio = document.getElementById(elementId);
     if (!audio) return;
     audio.currentTime = 0;
     audio.playbackRate = rate || 1.0;
-    audio.muted = true;
-    audio.play().then(() => {
-        audio.muted = false;
-    }).catch(e => {
+    audio.play().catch(e => {
         console.warn('SFX play failed (' + elementId + '):', e.message);
     });
 }
@@ -1279,12 +1288,21 @@ function playSfx(elementId, rate) {
 function stopLobbyMusic() {
     const audio = document.getElementById('lobby-music');
     if (!audio) return;
-    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
-    if (musicFadeInterval) { clearInterval(musicFadeInterval); musicFadeInterval = null; }
+
+    // Clear any ongoing fades
+    if (musicFadeInInterval) {
+        clearInterval(musicFadeInInterval);
+        musicFadeInInterval = null;
+    }
+    if (musicFadeInterval) {
+        clearInterval(musicFadeInterval);
+        musicFadeInterval = null;
+    }
+
     audio.pause();
     audio.currentTime = 0;
     audio.volume = 1.0;
-    console.log('Lobby music stopped');
+    console.log('Lobby music stopped immediately');
 }
 
 /**
