@@ -1192,6 +1192,7 @@ function startTutorial(data) {
 let audioCtx = null;
 const audioBuffers = {};  // keyed by name: 'lobby_music', 'tick', 'tock', 'bell'
 let audioLoaded = false;
+var pendingMusicFadeIn = null;  // queued fadeInDurationMs if music_start arrives before buffer ready
 
 /**
  * Update the on-screen audio debug overlay (temporary diagnostic).
@@ -1256,6 +1257,13 @@ function initAudio() {
     Promise.all(loadPromises).then(function() {
         audioLoaded = true;
         updateAudioDebug('All audio ready. Buffers: ' + Object.keys(audioBuffers).join(', '));
+
+        // If music_start arrived before the buffer was ready, play now
+        if (pendingMusicFadeIn !== null) {
+            updateAudioDebug('Playing deferred music_start');
+            startLobbyMusic(pendingMusicFadeIn);
+            pendingMusicFadeIn = null;
+        }
     });
 }
 
@@ -1287,8 +1295,13 @@ let musicFadeInInterval = null;
 
 function startLobbyMusic(fadeInDurationMs) {
     updateAudioDebug('startLobbyMusic called, ctx=' + (audioCtx ? audioCtx.state : 'null') + ', buffer=' + !!audioBuffers.lobby_music);
-    if (!audioCtx || !audioBuffers.lobby_music) {
-        updateAudioDebug('startLobbyMusic: NOT READY');
+    if (!audioCtx) {
+        updateAudioDebug('startLobbyMusic: no AudioContext');
+        return;
+    }
+    if (!audioBuffers.lobby_music) {
+        updateAudioDebug('startLobbyMusic: buffer not ready, queueing');
+        pendingMusicFadeIn = fadeInDurationMs;
         return;
     }
 
@@ -1394,6 +1407,9 @@ function playSfx(bufferName, rate) {
 }
 
 function stopLobbyMusic() {
+    // Cancel any pending deferred play
+    pendingMusicFadeIn = null;
+
     // Clear any ongoing fades
     if (musicFadeInInterval) {
         clearInterval(musicFadeInInterval);
