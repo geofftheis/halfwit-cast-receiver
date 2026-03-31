@@ -1184,30 +1184,102 @@ function startTutorial(data) {
 }
 
 // ── Lobby/Results Background Music ──────────────────────────────────
+//
+// Uses the Cast SDK's PlayerManager to play lobby music. This is the
+// official media playback path on Chromecast and has autoplay permission
+// (HTML5 audio.play() is blocked by autoplay policy on Chromecast).
+// Sound effects use the Web Audio API for low-latency one-shot playback.
 
-let musicFadeInterval = null;
-let musicFadeInInterval = null;
+var musicPlayerManager = null;
+var musicMediaElement = null;
+var musicFadeInterval = null;
+var musicFadeInInterval = null;
+var musicIsPlaying = false;
+
+// Web Audio API for sound effects
+var sfxAudioCtx = null;
+var sfxBuffers = {};
+
+/**
+ * Initialize audio systems. Call once during receiver init.
+ */
+function initAudio() {
+    // Get the Cast PlayerManager for lobby music
+    var context = cast.framework.CastReceiverContext.getInstance();
+    musicPlayerManager = context.getPlayerManager();
+
+    // Get the media element the PlayerManager controls
+    musicMediaElement = document.getElementById('castMediaPlayer') ||
+                         musicPlayerManager.getMediaElement();
+
+    if (musicMediaElement) {
+        musicMediaElement.loop = true;
+        console.log('Music: PlayerManager media element ready');
+    }
+
+    // Initialize Web Audio API for sound effects
+    try {
+        sfxAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        console.log('SFX: AudioContext created, state=' + sfxAudioCtx.state);
+    } catch (e) {
+        console.warn('SFX: AudioContext failed:', e.message);
+    }
+
+    // Pre-fetch and decode sound effect files
+    var sfxFiles = {
+        tick: 'tick.m4a?v=2',
+        tock: 'tock.m4a?v=2',
+        bell: 'bell_ding.m4a?v=2'
+    };
+    Object.entries(sfxFiles).forEach(function(entry) {
+        var name = entry[0];
+        var url = entry[1];
+        fetch(url)
+            .then(function(r) { return r.arrayBuffer(); })
+            .then(function(buf) { return sfxAudioCtx.decodeAudioData(buf); })
+            .then(function(decoded) {
+                sfxBuffers[name] = decoded;
+                console.log('SFX loaded: ' + name);
+            })
+            .catch(function(e) { console.warn('SFX load failed ' + name + ':', e.message); });
+    });
+}
 
 function startLobbyMusic(fadeInDurationMs) {
-    const audio = document.getElementById('lobby-music');
-    if (!audio) return;
+    if (!musicPlayerManager) {
+        console.warn('startLobbyMusic: PlayerManager not ready');
+        return;
+    }
 
     // Clear any ongoing fades
-    if (musicFadeInterval) {
-        clearInterval(musicFadeInterval);
-        musicFadeInterval = null;
-    }
-    if (musicFadeInInterval) {
-        clearInterval(musicFadeInInterval);
-        musicFadeInInterval = null;
-    }
+    if (musicFadeInterval) { clearInterval(musicFadeInterval); musicFadeInterval = null; }
+    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
 
-    audio.currentTime = 0;
-    audio.volume = 0;
-    audio.play().then(() => {
-        console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
+    // Build the absolute URL for the music file
+    var musicUrl = new URL('lobby_music.m4a?v=2', window.location.href).href;
 
-        // Fade in
+    // Load through PlayerManager using a LOAD request
+    var mediaInfo = new cast.framework.messages.MediaInformation();
+    mediaInfo.contentId = musicUrl;
+    mediaInfo.contentType = 'audio/mp4';
+    mediaInfo.streamType = cast.framework.messages.StreamType.BUFFERED;
+
+    var loadRequest = new cast.framework.messages.LoadRequestData();
+    loadRequest.media = mediaInfo;
+    loadRequest.autoplay = true;
+
+    musicPlayerManager.load(loadRequest).then(function() {
+        console.log('Lobby music loaded via PlayerManager, fading in over ' + fadeInDurationMs + 'ms');
+        musicIsPlaying = true;
+
+        // Set loop on the media element
+        if (musicMediaElement) {
+            musicMediaElement.loop = true;
+        }
+
+        // Start at 0 volume and fade in
+        if (musicMediaElement) { musicMediaElement.volume = 0; }
+
         if (fadeInDurationMs && fadeInDurationMs > 0) {
             var steps = 30;
             var stepDelay = fadeInDurationMs / steps;
@@ -1216,93 +1288,83 @@ function startLobbyMusic(fadeInDurationMs) {
 
             musicFadeInInterval = setInterval(function() {
                 currentStep++;
-                var newVolume = Math.min(1.0, audio.volume + volumeStep);
-                audio.volume = newVolume;
-                if (currentStep >= steps || newVolume >= 1.0) {
+                var newVolume = Math.min(1.0, currentStep * volumeStep);
+                if (musicMediaElement) { musicMediaElement.volume = newVolume; }
+                if (currentStep >= steps) {
                     clearInterval(musicFadeInInterval);
                     musicFadeInInterval = null;
-                    audio.volume = 1.0;
+                    if (musicMediaElement) { musicMediaElement.volume = 1.0; }
                 }
             }, stepDelay);
         } else {
-            audio.volume = 1.0;
+            if (musicMediaElement) { musicMediaElement.volume = 1.0; }
         }
-    }).catch(e => {
-        console.warn('Lobby music play failed:', e.message);
+    }).catch(function(e) {
+        console.warn('Lobby music load failed:', e.message);
     });
 }
 
 function fadeStopLobbyMusic(fadeDurationMs) {
-    const audio = document.getElementById('lobby-music');
-    if (!audio || audio.paused) return;
+    if (!musicIsPlaying || !musicMediaElement) return;
 
     // Clear any in-progress fade-in
-    if (musicFadeInInterval) {
-        clearInterval(musicFadeInInterval);
-        musicFadeInInterval = null;
-    }
+    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
+    if (musicFadeInterval) { clearInterval(musicFadeInterval); }
 
-    // Clear any previous fade-out
-    if (musicFadeInterval) {
-        clearInterval(musicFadeInterval);
-    }
-
-    const steps = 30;
-    const stepDelay = fadeDurationMs / steps;
-    const volumeStep = audio.volume / steps;
-    let currentStep = 0;
+    var steps = 30;
+    var stepDelay = fadeDurationMs / steps;
+    var startVolume = musicMediaElement.volume;
+    var volumeStep = startVolume / steps;
+    var currentStep = 0;
 
     console.log('Lobby music fading out over ' + fadeDurationMs + 'ms');
 
-    musicFadeInterval = setInterval(() => {
+    musicFadeInterval = setInterval(function() {
         currentStep++;
-        const newVolume = Math.max(0, audio.volume - volumeStep);
-        audio.volume = newVolume;
+        var newVolume = Math.max(0, startVolume - currentStep * volumeStep);
+        if (musicMediaElement) { musicMediaElement.volume = newVolume; }
 
         if (currentStep >= steps || newVolume <= 0) {
             clearInterval(musicFadeInterval);
             musicFadeInterval = null;
-            audio.pause();
-            audio.currentTime = 0;
-            audio.volume = 1.0;
+            stopLobbyMusic();
             console.log('Lobby music fade complete, stopped');
         }
     }, stepDelay);
 }
 
 /**
- * Play a short sound effect by element ID.
- * Resets currentTime so rapid calls don't overlap stale playback.
- * Optional rate parameter adjusts playback speed/pitch (default 1.0).
+ * Play a sound effect via Web Audio API.
+ * Maps element IDs to buffer names for backward compatibility.
  */
 function playSfx(elementId, rate) {
-    const audio = document.getElementById(elementId);
-    if (!audio) return;
-    audio.currentTime = 0;
-    audio.playbackRate = rate || 1.0;
-    audio.play().catch(e => {
-        console.warn('SFX play failed (' + elementId + '):', e.message);
-    });
+    var nameMap = { 'sfx-tick': 'tick', 'sfx-tock': 'tock', 'sfx-bell': 'bell' };
+    var bufferName = nameMap[elementId] || elementId;
+
+    if (!sfxAudioCtx || !sfxBuffers[bufferName]) {
+        console.warn('playSfx: not ready for ' + bufferName);
+        return;
+    }
+
+    if (sfxAudioCtx.state === 'suspended') { sfxAudioCtx.resume(); }
+
+    var source = sfxAudioCtx.createBufferSource();
+    source.buffer = sfxBuffers[bufferName];
+    source.playbackRate.value = rate || 1.0;
+    source.connect(sfxAudioCtx.destination);
+    source.start(0);
 }
 
 function stopLobbyMusic() {
-    const audio = document.getElementById('lobby-music');
-    if (!audio) return;
-
     // Clear any ongoing fades
-    if (musicFadeInInterval) {
-        clearInterval(musicFadeInInterval);
-        musicFadeInInterval = null;
-    }
-    if (musicFadeInterval) {
-        clearInterval(musicFadeInterval);
-        musicFadeInterval = null;
-    }
+    if (musicFadeInInterval) { clearInterval(musicFadeInInterval); musicFadeInInterval = null; }
+    if (musicFadeInterval) { clearInterval(musicFadeInterval); musicFadeInterval = null; }
 
-    audio.pause();
-    audio.currentTime = 0;
-    audio.volume = 1.0;
-    console.log('Lobby music stopped immediately');
+    if (musicPlayerManager && musicIsPlaying) {
+        try { musicPlayerManager.stop(); } catch (e) {}
+    }
+    musicIsPlaying = false;
+    console.log('Lobby music stopped');
 }
 
 /**
@@ -1349,6 +1411,9 @@ function initReceiver() {
 
     // Start the receiver
     context.start(options);
+
+    // Initialize audio systems after context is started
+    initAudio();
 
     console.log('Cast Receiver started');
 }
