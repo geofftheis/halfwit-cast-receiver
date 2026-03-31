@@ -1204,6 +1204,9 @@ function startLobbyMusic(fadeInDurationMs) {
     audio.play().then(() => {
         console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
 
+        // Load SFX after music is playing and stable (5s delay)
+        setTimeout(initSfx, 5000);
+
         // Fade in
         if (fadeInDurationMs && fadeInDurationMs > 0) {
             var steps = 30;
@@ -1275,22 +1278,37 @@ function fadeStopLobbyMusic(fadeDurationMs) {
 
 var sfxBlobUrls = {};
 var sfxAudio = null;
+var sfxInitStarted = false;
 
 function initSfx() {
+    if (sfxInitStarted) return;
+    sfxInitStarted = true;
+    console.log('SFX: loading sound effects...');
+
     // Create a single shared audio element for SFX (not added to DOM with preload)
     sfxAudio = document.createElement('audio');
 
-    var files = { tick: 'tick.m4a', tock: 'tock.m4a', bell: 'bell_ding.m4a' };
-    Object.entries(files).forEach(function(entry) {
-        var name = entry[0], url = entry[1];
+    // Load sequentially to avoid network contention that causes lobby music stutter
+    var files = [['tick', 'tick.m4a'], ['tock', 'tock.m4a'], ['bell', 'bell_ding.m4a']];
+    var loadNext = function(i) {
+        if (i >= files.length) {
+            console.log('SFX: all sound effects loaded');
+            return;
+        }
+        var name = files[i][0], url = files[i][1];
         fetch(url)
             .then(function(r) { return r.blob(); })
             .then(function(blob) {
                 sfxBlobUrls[name] = URL.createObjectURL(blob);
                 console.log('SFX loaded: ' + name + ' (' + blob.size + ' bytes)');
+                loadNext(i + 1);
             })
-            .catch(function(e) { console.warn('SFX load failed ' + name + ':', e.message); });
-    });
+            .catch(function(e) {
+                console.warn('SFX load failed ' + name + ':', e.message);
+                loadNext(i + 1);
+            });
+    };
+    loadNext(0);
 }
 
 function playSfx(elementId, rate) {
@@ -1377,10 +1395,8 @@ function initReceiver() {
     // Start the receiver
     context.start(options);
 
-    // Pre-fetch and decode sound effect files via Web Audio API
-    // (SFX can't use <audio> elements — multiple elements with preload
-    // prevent the lobby music element from playing on Chromecast)
-    initSfx();
+    // SFX loading is deferred until after lobby music starts playing
+    // to avoid network activity causing audio stutter on Chromecast
 
     console.log('Cast Receiver started');
 }
