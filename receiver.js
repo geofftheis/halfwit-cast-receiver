@@ -1329,7 +1329,7 @@ function playSfx(elementId, rate) {
     audio.loop = false;
     audio.src = blobUrl;
     audio.playbackRate = rate || 1.0;
-    audio.volume = 1.0;
+    audio.volume = 0.8;
     audio.load();
     audio.play().then(function() {
         console.log('SFX played: ' + name);
