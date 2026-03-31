@@ -1215,8 +1215,8 @@ function startLobbyMusic(fadeInDurationMs) {
     }
 
     audio.currentTime = 0;
-    audio.volume = 0;
-    dbg('Calling audio.play()...');
+    audio.volume = 1;
+    dbg('Calling audio.play() vol=1...');
     audio.play().then(() => {
         dbg('play() OK dur=' + audio.duration.toFixed(1) + 's muted=' + audio.muted + ' vol=' + audio.volume + ' src=' + audio.src.split('/').pop());
         console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
