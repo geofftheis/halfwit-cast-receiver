@@ -332,7 +332,7 @@ function handleMessage(message) {
                 break;
 
             case 'play_vote_tick':
-                playSfx('vote', 1.8);
+                playSfx('vote', 1.6);
                 break;
 
             default:
