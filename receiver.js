@@ -311,6 +311,7 @@ function handleMessage(message) {
                 break;
 
             case 'music_start':
+                dbg('MSG: music_start received');
                 startLobbyMusic(data.fadeInDurationMs || 2000);
                 break;
 
@@ -1188,8 +1189,19 @@ function startTutorial(data) {
 let musicFadeInterval = null;
 let musicFadeInInterval = null;
 
+function dbg(msg) {
+    var el = document.getElementById('audio-debug');
+    if (el) {
+        el.innerHTML += msg + '<br>';
+        var lines = el.innerHTML.split('<br>');
+        if (lines.length > 12) el.innerHTML = lines.slice(lines.length - 12).join('<br>');
+    }
+    console.log('[AUDIO] ' + msg);
+}
+
 function startLobbyMusic(fadeInDurationMs) {
     const audio = document.getElementById('lobby-music');
+    dbg('startLobbyMusic: element=' + !!audio + ', readyState=' + (audio ? audio.readyState : 'n/a') + ', networkState=' + (audio ? audio.networkState : 'n/a'));
     if (!audio) return;
 
     // Clear any ongoing fades
@@ -1204,7 +1216,9 @@ function startLobbyMusic(fadeInDurationMs) {
 
     audio.currentTime = 0;
     audio.volume = 0;
+    dbg('Calling audio.play()...');
     audio.play().then(() => {
+        dbg('play() SUCCESS');
         console.log('Lobby music started, fading in over ' + fadeInDurationMs + 'ms');
 
         // Fade in
@@ -1228,7 +1242,7 @@ function startLobbyMusic(fadeInDurationMs) {
             audio.volume = 1.0;
         }
     }).catch(e => {
-        console.warn('Lobby music play failed:', e.message);
+        dbg('play() FAILED: ' + e.name + ': ' + e.message);
     });
 }
 
