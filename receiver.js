@@ -665,14 +665,22 @@ function updateRoundResultsScreen(data) {
         });
 
         if (isTwoColumn) {
-            // Two-column layout: reorder DOM directly (translateY doesn't work with flex-wrap)
-            const sortedEntries = entries.slice().sort((a, b) => {
-                return parseInt(a.getAttribute('data-final-index')) - parseInt(b.getAttribute('data-final-index'));
-            });
+            // Two-column layout: fade out, reorder DOM, fade back in
+            // (translateY doesn't work with flex-wrap)
+            leaderboard.style.transition = 'opacity 1s ease-in-out';
+            leaderboard.style.opacity = '0';
 
-            sortedEntries.forEach(entry => {
-                leaderboard.appendChild(entry);
-            });
+            setTimeout(() => {
+                const sortedEntries = entries.slice().sort((a, b) => {
+                    return parseInt(a.getAttribute('data-final-index')) - parseInt(b.getAttribute('data-final-index'));
+                });
+
+                sortedEntries.forEach(entry => {
+                    leaderboard.appendChild(entry);
+                });
+
+                leaderboard.style.opacity = '1';
+            }, 1000);
         } else {
             // Single-column layout: use translateY animation
             const firstEntry = entries[0];
@@ -696,7 +704,7 @@ function updateRoundResultsScreen(data) {
 
                 console.log(`Player ${i}: initial=${initialIndex}, final=${finalIndex}, move=${moveDistance}px`);
 
-                entry.style.transition = 'transform 0.8s ease-in-out';
+                entry.style.transition = 'transform 1s ease-in-out';
                 entry.style.transform = `translateY(${moveDistance}px)`;
             });
 
