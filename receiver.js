@@ -319,8 +319,12 @@ function handleMessage(message) {
                 stopLobbyMusic();
                 break;
 
+            case 'play_countdown_bell':
+                playSfx('countdown_bell');
+                break;
+
             case 'play_countdown':
-                playSfx('countdown');
+                playSfx('countdown_bell');
                 break;
 
             case 'stop_countdown':
@@ -1286,6 +1290,7 @@ function fadeStopLobbyMusic(fadeDurationMs) {
 
 var sfxBlobUrls = {};
 var sfxInitStarted = false;
+var lastSfxStopTime = 0;
 
 function initSfx() {
     if (sfxInitStarted) return;
@@ -1293,7 +1298,7 @@ function initSfx() {
     console.log('SFX: loading sound effects...');
 
     // Load sequentially to avoid network contention that causes lobby music stutter
-    var files = [['countdown', 'countdown.m4a'], ['bell', 'bell_ding.m4a'], ['vote', 'vote.m4a']];
+    var files = [['countdown_bell', 'countdown_bell.m4a'], ['bell', 'bell_ding.m4a'], ['vote', 'vote.m4a']];
     var loadNext = function(i) {
         if (i >= files.length) {
             console.log('SFX: all sound effects loaded');
@@ -1315,7 +1320,7 @@ function initSfx() {
     loadNext(0);
 }
 
-function playSfx(name, rate) {
+function doPlaySfx(name, rate) {
     var blobUrl = sfxBlobUrls[name];
     var audio = document.getElementById('game-audio');
     if (!audio || !blobUrl) {
@@ -1341,6 +1346,17 @@ function playSfx(name, rate) {
     });
 }
 
+function playSfx(name, rate) {
+    // If audio was just stopped (e.g. early complete), give the element time to settle
+    // before swapping src, otherwise the Chromecast may silently fail
+    var timeSinceStop = Date.now() - lastSfxStopTime;
+    if (timeSinceStop < 150) {
+        setTimeout(function() { doPlaySfx(name, rate); }, 150 - timeSinceStop);
+    } else {
+        doPlaySfx(name, rate);
+    }
+}
+
 function stopSfx() {
     var audio = document.getElementById('game-audio');
     if (!audio || audio.paused) return;
@@ -1348,6 +1364,7 @@ function stopSfx() {
     if (!audio.src.includes('lobby_music')) {
         audio.pause();
         audio.currentTime = 0;
+        lastSfxStopTime = Date.now();
         console.log('SFX stopped');
     }
 }
